@@ -1,3 +1,4 @@
+package com.proj.javafiles;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -22,11 +23,9 @@ import javax.swing.JToggleButton;
 
 public class ParticleSimulation extends JFrame{
     //private final ExecutorService executorService;
-    private final SimulationPanel simulationPanel;
+    public final SimulationPanel simulationPanel;
     private final JPanel particleControlPanel = new JPanel(null);
     private final JPanel particleFieldControlPanel = new JPanel(null);
-    private final JPanel modeControlPanel = new JPanel(null);
-    private final JPanel modeFieldControlPanel = new JPanel(null);
     private final JPanel controlPanel = new JPanel(null);
     private JComboBox<String> addParticleDropdown;
     private JButton particleAddButton;
@@ -43,7 +42,7 @@ public class ParticleSimulation extends JFrame{
     private JCheckBox opt3 = new JCheckBox();
     private JCheckBox opt4 = new JCheckBox();
     
-    public ParticleSimulation(){
+    public ParticleSimulation(boolean isDev){
         super("Particle Simulation");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1680, 920);
@@ -51,7 +50,7 @@ public class ParticleSimulation extends JFrame{
         setBackground(Color.BLACK);
         setLayout(null);
         //executorService = Executors.newFixedThreadPool(THREAD_COUNT);
-        simulationPanel = new SimulationPanel();
+        simulationPanel = new SimulationPanel(isDev);
         add(simulationPanel);
         createControlPanel();
         add(controlPanel);
@@ -172,48 +171,7 @@ public class ParticleSimulation extends JFrame{
         particleControlPanel.add(particleFieldControlPanel);
         particleControlPanel.add(particleAddButton);
 
-        modeControlPanel.setLayout(new GridLayout(3, 1)); 
-
-        JPanel toggleButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-
-        modeFieldControlPanel.removeAll(); 
-        modeFieldControlPanel.setLayout(new GridLayout(1, 1)); 
-        modeFieldControlPanel.add(new JLabel("Choose Mode:"));
-
-        // Creating the toggle buttons
-        JToggleButton developerToggleButton = new JToggleButton("Developer", true);
-        developerToggleButton.setBackground(Color.LIGHT_GRAY);
-
-        JToggleButton explorerToggleButton = new JToggleButton("Explorer", false);
-        explorerToggleButton.setBackground(Color.LIGHT_GRAY);
-
-        ButtonGroup modeButtonGroup = new ButtonGroup();
-        modeButtonGroup.add(developerToggleButton);
-        modeButtonGroup.add(explorerToggleButton);
-
-        developerToggleButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                simulationPanel.changeDevMode(true);
-            }
-        });
-
-        explorerToggleButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                simulationPanel.changeDevMode(false);
-            }
-        });
-
-        toggleButtonPanel.add(developerToggleButton);
-        toggleButtonPanel.add(explorerToggleButton);
-
-        modeControlPanel.add(modeFieldControlPanel);
-        modeControlPanel.add(toggleButtonPanel);
-
-        controlPanel.add(modeControlPanel);
         controlPanel.add(particleControlPanel);
-        
     }
 
     public void disableMultiples(){
@@ -234,8 +192,5 @@ public class ParticleSimulation extends JFrame{
         pA2.setText("");
         pV2.setText("");
         pN.setText("");
-    }
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new ParticleSimulation().setVisible(true));
     }
 }

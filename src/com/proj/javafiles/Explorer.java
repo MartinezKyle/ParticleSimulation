@@ -1,3 +1,4 @@
+package com.proj.javafiles;
 import javax.swing.JComponent;
 import java.awt.*;
 
@@ -10,6 +11,14 @@ public class Explorer extends JComponent {
         this.y_coord = y;
         this.setSize(20, 20); 
         repaint();
+    }
+
+    public double getXCoord(){
+        return x_coord;
+    }
+
+    public double getYCoord() {
+        return y_coord;
     }
 
     @Override

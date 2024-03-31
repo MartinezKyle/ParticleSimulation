@@ -1,3 +1,4 @@
+package com.proj.javafiles;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -14,7 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 public class SimulationPanel extends JPanel{
-    private List<Particle> particles = Collections.synchronizedList(new ArrayList<Particle>());
+    public List<Particle> particles = Collections.synchronizedList(new ArrayList<Particle>());
     private final int SIMULATION_WIDTH = 1280;
     private final int SIMULATION_HEIGHT = 720;
     private final int THREAD_COUNT = 8;
@@ -26,10 +27,14 @@ public class SimulationPanel extends JPanel{
     public static int previousFPS = 0;
     public long lastFPSCheck = 0;
 
+    public List<Explorer> explorers = Collections.synchronizedList(new ArrayList<Explorer>());
     public Explorer explorer;
     private boolean isDevMode = true;
 
-    public SimulationPanel(){
+    private ParticleSimulationServer server;
+
+    public SimulationPanel(boolean isDev){
+        this.isDevMode = isDev;
         setBounds(50, 50, SIMULATION_WIDTH, SIMULATION_HEIGHT);
         setBackground(Color.WHITE);
         setFocusable(true);
@@ -45,6 +50,10 @@ public class SimulationPanel extends JPanel{
                 }
             }
         });
+    }
+
+    public void setServer(ParticleSimulationServer server){
+        this.server = server;
     }
 
     public void opt1Add(double x, double y, double angle, double velocity){
@@ -154,7 +163,13 @@ public class SimulationPanel extends JPanel{
                 particle.updatePosition(0.1);
             }
         }
+        
         SwingUtilities.invokeLater(this::repaint);
+
+        // if (server != null && !server.clientHandlers.isEmpty()){
+        //     server.broadcastSimulationState();
+        // }
+
         frameCount++;
     }
 
