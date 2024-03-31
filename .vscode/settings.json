@@ -1,10 +1,9 @@
 {
-    "java.project.sourcePaths": ["src/com/**"],
+    "java.project.sourcePaths": [
+        "src/com/proj/javafiles"
+    ],
     "java.project.outputPath": "bin",
     "java.project.referencedLibraries": [
         "lib/**/*.jar"
-    ],
-    "cmake.configureSettings": {
-        "CMAKE_TOOLCHAIN_FILE": "C:/Users/Alybee/Documents/vcpkg/scripts/buildsystems/vcpkg.cmake"
-    }
+    ]
 }
