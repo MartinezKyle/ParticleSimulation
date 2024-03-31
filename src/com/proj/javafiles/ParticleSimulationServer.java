@@ -193,6 +193,8 @@ public class ParticleSimulationServer {
         }
         
         private void sendTypedMessage(String type, byte[] data) throws IOException {
+            dos.flush();
+            
             dos.writeUTF(type);
             dos.flush();
         
