@@ -60,7 +60,10 @@ public class SimulationPanel extends JPanel{
         this.particles.add(particle);
         particle.setBounds(0,0, 1280,720);
         this.add(particle);
-        //updateSimulation();
+        
+        if (server != null && !server.clientHandlers.isEmpty()){
+            server.broadcastParticle(particle);
+        }
     }
 
     public void opt2Add(int n, double x1, double y1, double x2, double y2, double angle, double velocity){
@@ -164,10 +167,6 @@ public class SimulationPanel extends JPanel{
         }
         
         SwingUtilities.invokeLater(this::repaint);
-
-        // if (server != null && !server.clientHandlers.isEmpty()){
-        //     server.broadcastSimulationState();
-        // }
 
         frameCount++;
     }

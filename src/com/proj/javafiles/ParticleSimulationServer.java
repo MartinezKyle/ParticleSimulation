@@ -60,6 +60,26 @@ public class ParticleSimulationServer {
         });
     }
 
+    public void broadcastParticle(Particle p) {
+        clientHandlers.forEach(handler -> {
+            try {
+                handler.sendParticle(p);
+            } catch (IOException e) {
+                System.err.println("Error broadcasting state: " + e.getMessage());
+            }
+        });
+    }
+
+    public void broadcastExplorer(Explorer explorer) {
+        clientHandlers.forEach(handler -> {
+            try {
+                handler.sendExplorer(explorer);
+            } catch (IOException e) {
+                System.err.println("Error broadcasting state: " + e.getMessage());
+            }
+        });
+    }
+
     public class ClientHandler implements Runnable {
         private final Socket clientSocket;
         private final ConcurrentHashMap<Integer, Point> explorerPositions;
@@ -103,33 +123,7 @@ public class ParticleSimulationServer {
                 server.clientHandlers.remove(this);
                 System.out.println("Client disconnected and handler removed.");
             }
-        }
-
-        // public byte[] serializeSimulationState() throws IOException {
-        //     if (particleSimulation.simulationPanel.particles.isEmpty() && particleSimulation.simulationPanel.explorers.isEmpty()) {
-        //         System.out.println("Both particles and explorers are empty.");
-        //         return null;
-        //     }
-        
-        //     List<Particle> particleStates = particleSimulation.simulationPanel.particles.stream()
-        //                                                     .map(p -> new Particle(p.getXCoord(), p.getYCoord(), p.getAngle(), p.getVelocity()))
-        //                                                     .collect(Collectors.toList());
-        //     List<Explorer> explorerStates = particleSimulation.simulationPanel.explorers.stream()
-        //                                                     .map(e -> new Explorer(e.getXCoord(), e.getYCoord()))
-        //                                                     .collect(Collectors.toList());
-        
-        //     // Assuming SimulationState class exists and is Serializable
-        //     SimulationState state = new SimulationState(particleStates, explorerStates);
-        
-        //     System.out.println("Particle States: " + particleStates);
-        
-        //     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        //     try (GZIPOutputStream gzipOut = new GZIPOutputStream(baos);
-        //          ObjectOutputStream oos = new ObjectOutputStream(gzipOut)) {
-        //         oos.writeObject(state);
-        //     }
-        //     return baos.toByteArray();
-        // }        
+        } 
 
         public byte[] serializeSimulationState(String type) throws IOException {
             // SimulationState state = null;
@@ -174,6 +168,32 @@ public class ParticleSimulationServer {
             return baos.toByteArray();
         }        
 
+        public byte[] serializeParticle(Particle p) throws IOException {
+            ParticleState state = new ParticleState(p.getXCoord(), p.getYCoord(), p.getVelocity(), p.getAngle());
+        
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(state);
+        
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (GZIPOutputStream gzipOut = new GZIPOutputStream(baos)) {
+                gzipOut.write(json.getBytes(StandardCharsets.UTF_8));
+            }
+            return baos.toByteArray();
+        }   
+
+        public byte[] serializeExplorer(Explorer e) throws IOException {
+            ExplorerState state = new ExplorerState(e.getXCoord(), e.getYCoord());
+        
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(state);
+        
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (GZIPOutputStream gzipOut = new GZIPOutputStream(baos)) {
+                gzipOut.write(json.getBytes(StandardCharsets.UTF_8));
+            }
+            return baos.toByteArray();
+        }   
+
         public void sendState() throws IOException {
             // Example type indicators
             String typeParticle = "Particles";
@@ -186,6 +206,29 @@ public class ParticleSimulationServer {
             if (serializedParticleState.length > 0) {
                 sendTypedMessage(typeParticle, serializedParticleState);
             }
+            
+            if (serializedExplorerState.length > 0) {
+                sendTypedMessage(typeExplorer, serializedExplorerState);
+            }
+        }
+
+        public void sendParticle(Particle p) throws IOException {
+            // Example type indicators
+            String typeParticle = "Particles";
+        
+            // Serialize your state here (this is just an example)
+            byte[] serializedParticleState = serializeParticle(p);
+        
+            if (serializedParticleState.length > 0) {
+                sendTypedMessage(typeParticle, serializedParticleState);
+            }
+        }
+
+        public void sendExplorer(Explorer e) throws IOException {
+            String typeExplorer = "Explorers";
+        
+            // Serialize your state here (this is just an example)
+            byte[] serializedExplorerState = serializeExplorer(e);
             
             if (serializedExplorerState.length > 0) {
                 sendTypedMessage(typeExplorer, serializedExplorerState);
