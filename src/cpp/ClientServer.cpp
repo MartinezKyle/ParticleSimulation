@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <zlib.h>
 #include <nlohmann/json.hpp>
-#include <thread> 
+#include <boost/thread.hpp>
 
 #include "ParticleSimulation.hpp"
 
@@ -90,7 +90,7 @@ int main() {
     }
     std::cout << "Connected to server." << std::endl;
 
-    std::thread simThread([&simulation](){
+    boost::thread simThread([&simulation](){
         simulation.run();
     });
 

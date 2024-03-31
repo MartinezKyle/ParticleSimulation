@@ -21,7 +21,7 @@ fi
 cd $VCPKG_DIR
 
 # Install packages
-./vcpkg install boost-asio zlib sfml nlohmann-json
+./vcpkg install boost-asio zlib sfml nlohmann-json boost-thread
 if [ $? -ne 0 ]; then
     echo "Failed to install packages with vcpkg."
     exit 1

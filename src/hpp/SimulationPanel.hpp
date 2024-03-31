@@ -6,7 +6,7 @@
 #include <cmath>
 #include <algorithm>
 #include <chrono>
-#include <thread>
+#include <boost/thread.hpp>
 #include <mutex>
 #include <memory>
 #include <nlohmann/json.hpp>

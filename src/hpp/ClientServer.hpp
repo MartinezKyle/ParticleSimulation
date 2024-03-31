@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <zlib.h>
 #include <nlohmann/json.hpp>
-#include <thread> 
+#include <boost/thread.hpp>
 
 #include "ParticleSimulation.hpp"
 

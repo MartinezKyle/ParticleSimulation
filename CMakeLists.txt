@@ -6,7 +6,7 @@ project(DistributedParticleExplorer LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system thread)
 find_package(ZLIB REQUIRED)
 find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
@@ -36,6 +36,7 @@ add_executable(ClientServer
 
 target_link_libraries(ClientServer PRIVATE 
     Boost::system
+    Boost::thread
     ZLIB::ZLIB
     sfml-system sfml-network sfml-graphics sfml-window
     nlohmann_json::nlohmann_json
