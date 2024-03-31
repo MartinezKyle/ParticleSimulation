@@ -4,8 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${vcpkgRoot}/x64-windows/include"
-                ,"${vcpkgRoot}/x86-windows/include"
+                "${workspaceFolder}/vcpkg/installed/x64-windows/include",
+                "${workspaceFolder}/src/hpp/"
             ],
             "defines": [
                 "_DEBUG",

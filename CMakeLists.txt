@@ -8,9 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(ZLIB REQUIRED)
+find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 include_directories(
-    ${CMAKE_SOURCE_DIR}/lib 
+    ${CMAKE_SOURCE_DIR}/src/hpp 
     $ENV{JAVA_HOME}/include
     ${Boost_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIRS}
@@ -24,9 +26,17 @@ elseif(APPLE)
     include_directories($ENV{JAVA_HOME}/include/darwin)
 endif()
 
-add_executable(ClientServer src/cpp/ClientServer.cpp)
+add_executable(ClientServer 
+    src/cpp/Explorer.cpp
+    src/cpp/Particle.cpp
+    src/cpp/SimulationPanel.cpp
+    src/cpp/ParticleSimulation.cpp
+    src/cpp/ClientServer.cpp
+)
 
 target_link_libraries(ClientServer PRIVATE 
     Boost::system
     ZLIB::ZLIB
+    sfml-system sfml-network sfml-graphics sfml-window
+    nlohmann_json::nlohmann_json
 )

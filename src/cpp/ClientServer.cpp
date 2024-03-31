@@ -1,3 +1,5 @@
+#include "ClientServer.hpp"
+
 #include <boost/asio.hpp>
 #include <iostream>
 #include <vector>
@@ -6,22 +8,15 @@
 #include <sstream>
 #include <iomanip>
 #include <zlib.h>
-#include <iostream>
 #include <nlohmann/json.hpp>
+#include <thread> 
+
+#include "ParticleSimulation.hpp"
 
 using boost::asio::ip::tcp;
 namespace asio = boost::asio;
 using boost::system::error_code;
 using json = nlohmann::json;
-
-std::string toHexString(const std::vector<char>& data) {
-    std::stringstream ss;
-    ss << std::hex << std::uppercase << std::setfill('0');
-    for (unsigned char c : data) {
-        ss << std::setw(2) << static_cast<int>(c);
-    }
-    return ss.str();
-}
 
 std::vector<char> prepareMessageForJavaUTF(const std::string& message) {
     // Java's DataInputStream.readUTF() expects the first two bytes to contain the length
@@ -87,11 +82,17 @@ int main() {
     boost::system::error_code ec;
     connect(socket, endpoints, ec);
 
+    ParticleSimulation simulation;
+
     if (ec) {
         std::cerr << "Failed to connect to server: " << ec.message() << std::endl;
         return 1;
     }
     std::cout << "Connected to server." << std::endl;
+
+    std::thread simThread([&simulation](){
+        simulation.run();
+    });
 
     try {
         asio::streambuf buffer;
@@ -134,8 +135,13 @@ int main() {
                 std::string decompressedJson = decompressGzip(jsonData);
                 auto jsonParsed = json::parse(decompressedJson);
                 std::cout << "JSON Data: " << jsonParsed.dump(4) << std::endl;
-                // Based on the dataType, handle the parsed JSON appropriately
-                // ...
+                
+                if ("Particles" == dataType){
+                    simulation.addParticle(jsonParsed);
+                } else if ("Explorers" == dataType){
+
+                }
+
             } catch (const std::exception& e) {
                 std::cerr << "Error handling JSON data: " << e.what() << std::endl;
             }

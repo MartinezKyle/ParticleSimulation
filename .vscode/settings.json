@@ -2,8 +2,11 @@
     "java.project.sourcePaths": [
         "src/com/proj/javafiles"
     ],
-    "java.project.outputPath": "bin",
+    "java.project.outputPath": "bin/src/com/proj/javafiles",
     "java.project.referencedLibraries": [
         "lib/**/*.jar"
-    ]
+    ],
+    "cmake.configureSettings": {
+        "CMAKE_TOOLCHAIN_FILE": "vcpkg/scripts/buildsystems/vcpkg.cmake"
+    }
 }
