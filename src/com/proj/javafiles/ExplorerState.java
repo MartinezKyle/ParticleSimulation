@@ -1,5 +1,3 @@
-package com.proj.javafiles;
-
 public class ExplorerState {
     private double x_coord;
     private double y_coord;

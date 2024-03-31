@@ -1,5 +1,4 @@
 #include <boost/asio.hpp>
-#include <jni.h>
 #include <iostream>
 #include <vector>
 #include <cstdlib> 

@@ -1,5 +1,3 @@
-package com.proj.javafiles;
-
 import java.io.Serializable;
 import java.util.List;
 
