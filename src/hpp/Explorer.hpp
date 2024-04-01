@@ -8,6 +8,10 @@ public:
     Explorer(double x, double y);
     double getXCoord() const;
     double getYCoord() const;
+    void moveUp();
+    void moveDown();
+    void moveLeft();
+    void moveRight();
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 private:

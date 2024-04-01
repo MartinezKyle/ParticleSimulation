@@ -63,6 +63,10 @@ void SimulationPanel::addExplorer(double x, double y) {
     explorer = std::make_shared<Explorer>(x, y);
 }
 
+const std::shared_ptr<Explorer>& SimulationPanel::getExplorer() const {
+    return explorer;
+}
+
 void SimulationPanel::updateSimulation() {
     for (auto& particle : particles) {
         particle->updatePosition(0.00169);
@@ -115,3 +119,4 @@ void SimulationPanel::drawFPSInfo(sf::RenderTarget& target) const {
 
     target.draw(text);
 }
+

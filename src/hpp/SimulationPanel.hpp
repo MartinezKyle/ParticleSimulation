@@ -23,6 +23,7 @@ public:
     void setServer(void* server);
     void parseJSONToParticles(const json& jsonData);
     void addExplorer(double x, double y);
+    const std::shared_ptr<Explorer>& getExplorer() const;
     void updateSimulation();
     void changeDevMode(bool isDev);
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;

@@ -18,6 +18,26 @@ double Explorer::getYCoord() const {
     return y_coord;
 }
 
+void Explorer::moveUp() {
+    y_coord -= 5;
+    shape.setPosition(x_coord, y_coord); // Adjust position for drawing
+}
+
+void Explorer::moveDown() {
+    y_coord += 5;
+    shape.setPosition(x_coord, y_coord); // Adjust position for drawing
+}
+
+void Explorer::moveLeft() {
+    x_coord -= 5;
+    shape.setPosition(x_coord, y_coord); // Adjust position for drawing
+}
+
+void Explorer::moveRight() {
+    x_coord += 5;
+    shape.setPosition(x_coord, y_coord); // Adjust position for drawing
+}
+
 void Explorer::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     target.draw(shape, states);
 }
