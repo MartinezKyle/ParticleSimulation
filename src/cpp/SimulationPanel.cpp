@@ -23,7 +23,7 @@ SimulationPanel::SimulationPanel(bool isDev) : isDevMode(isDev) {
     lastFPSCheck = std::chrono::high_resolution_clock::now();
     particles.reserve(1000);
 
-    if (!font.loadFromFile("../lib/calibri.ttf")) {
+    if (!font.loadFromFile("../../lib/calibri.ttf")) {
         std::cerr << "Failed to load font file" << std::endl;
     }
 }
@@ -65,7 +65,7 @@ void SimulationPanel::addExplorer(double x, double y) {
 
 void SimulationPanel::updateSimulation() {
     for (auto& particle : particles) {
-        particle->updatePosition(0.1);
+        particle->updatePosition(0.00169);
     }
 
     frameCount++;
