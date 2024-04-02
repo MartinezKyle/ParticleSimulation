@@ -16,7 +16,7 @@
 
 using json = nlohmann::json;
 
-SimulationPanel::SimulationPanel(bool isDev) : isDevMode(isDev) {
+SimulationPanel::SimulationPanel() {
     explorer = nullptr;
     frameCount = 0;
     previousFPS = 0;
@@ -127,10 +127,6 @@ void SimulationPanel::updateSimulation() {
         frameCount = 0;
         lastFPSCheck = currentTime;
     }
-}
-
-void SimulationPanel::changeDevMode(bool isDev) {
-    isDevMode = isDev;
 }
 
 void SimulationPanel::draw(sf::RenderTarget& target, sf::RenderStates states) const {

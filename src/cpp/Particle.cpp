@@ -25,8 +25,6 @@ void Particle::updatePosition(double time) {
     x_coord += getVelocityX() * time;
     y_coord += getVelocityY() * time;
     shape.setPosition(x_coord - 5, 720 - y_coord - 5);
-
-    // std::cout << "velocityx " << getVelocityX() << "velocityy " << getVelocityY() << std::endl;
 }
 
 double Particle::getXCoord() const {

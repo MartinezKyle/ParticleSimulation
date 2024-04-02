@@ -19,20 +19,22 @@ using json = nlohmann::json;
 
 class SimulationPanel : public sf::Drawable, public sf::Transformable {
 public:
-    SimulationPanel(bool isDev);
+    SimulationPanel();
+
     void parseJSONToParticles(const json& jsonData);
     void parseJSONToExplorers(const json& jsonData, const std::string& type);
+
     void addExplorer(int ID, double x, double y);
     const std::shared_ptr<Explorer>& getExplorer() const;
+
     void updateSimulation();
-    void changeDevMode(bool isDev);
+    
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 private:
     std::vector<std::shared_ptr<Particle>> particles;
     std::vector<std::shared_ptr<Explorer>> explorers;
     std::shared_ptr<Explorer> explorer;
-    bool isDevMode;
     int frameCount;
     int previousFPS;
     std::chrono::time_point<std::chrono::high_resolution_clock> lastFPSCheck;

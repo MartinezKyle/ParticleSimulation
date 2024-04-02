@@ -34,8 +34,6 @@ public class Particle extends JComponent{
         x_coord += getVelocityX() * time;
         y_coord += getVelocityY() * time;
         repaint();
-
-        // System.out.println("vx " + getVelocityX() + "vy " + getVelocityY());
     }
 
     public double getXCoord(){

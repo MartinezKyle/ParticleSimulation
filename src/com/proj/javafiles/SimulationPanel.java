@@ -20,7 +20,6 @@ public class SimulationPanel extends JPanel{
     private final int SIMULATION_HEIGHT = 720;
     private final int THREAD_COUNT = 8;
 
-    //private final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_COUNT);
     private final ExecutorService executorService = Executors.newWorkStealingPool();
 
     public static int frameCount = 0;
@@ -28,12 +27,10 @@ public class SimulationPanel extends JPanel{
     public long lastFPSCheck = 0;
 
     public List<Explorer> explorers = Collections.synchronizedList(new ArrayList<Explorer>());
-    private boolean isDevMode = true;
 
     private ParticleSimulationServer server;
 
-    public SimulationPanel(boolean isDev){
-        this.isDevMode = isDev;
+    public SimulationPanel(){
         setBounds(50, 50, SIMULATION_WIDTH, SIMULATION_HEIGHT);
         setBackground(Color.WHITE);
         setFocusable(true);
@@ -59,8 +56,6 @@ public class SimulationPanel extends JPanel{
         this.particles.add(particle);
         particle.setBounds(0,0, 1280,720);
         this.add(particle);
-
-        System.out.println("Particle: " + x + " " + y + " " + angle + " " + velocity);
         
         if (server != null && !server.clientHandlers.isEmpty()){
             server.broadcastParticle(particle);
@@ -193,11 +188,6 @@ public class SimulationPanel extends JPanel{
         SwingUtilities.invokeLater(this::repaint);
 
         frameCount++;
-    }
-
-    public void changeDevMode(boolean isDev){
-        this.isDevMode = isDev;
-        requestFocusInWindow();
     }
 
     public void removeExplorerById(int idToRemove) {

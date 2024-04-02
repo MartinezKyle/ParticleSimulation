@@ -6,13 +6,16 @@
 class Particle : public sf::Drawable {
 public:
     Particle(double x, double y, double velocity, double angle);
+
     void updatePosition(double time);
+
     double getXCoord() const;
     double getYCoord() const;
     double getAngle() const;
     double getVelocity() const;
     double getVelocityX() const;
     double getVelocityY() const;
+    
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 private:

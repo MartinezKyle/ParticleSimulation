@@ -15,11 +15,14 @@ public:
 
     void updateSimulationLoop();
     void run();
+
     void setID(const json& jsonData);
+    bool getIsRunning() const;
+
     void addParticle(const json& jsonData);
     void addOtherExplorer(const json& jsonData);
     void removeExplorer(const json& jsonData);
-    bool getIsRunning() const;
+
     SimulationPanel& getSimulationPanel();
 
 private:

@@ -6,16 +6,20 @@
 class Explorer : public sf::Drawable {
 public:
     Explorer(int clientID, double x, double y);
+
     double getXCoord() const;
     double getYCoord() const;
     double getID() const;
-    void updateCoords(double x, double y);
+    bool getMove();
+
     void moveUp();
     void moveDown();
     void moveLeft();
     void moveRight();
-    bool getMove();
+    
     void revertMove();
+    void updateCoords(double x, double y);
+
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 private:

@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class ParticleSimulationServer {
     private static ParticleSimulation particleSimulation;
     private ServerSocket serverSocket;
-    
+
     private final ExecutorService clientExecutor = Executors.newCachedThreadPool();
     public final List<ClientHandler> clientHandlers = new CopyOnWriteArrayList<>();
 
@@ -162,7 +162,6 @@ public class ParticleSimulationServer {
         } 
 
         public byte[] serializeSimulationState(String type) throws IOException {
-            // SimulationState state = null;
             Object state = null;
         
             if ("Particles".equals(type)) {
@@ -305,7 +304,7 @@ public class ParticleSimulationServer {
               
     }
 
-    public static void displayGUI(boolean isDevMode) {
+    public static void displayGUI() {
         SwingUtilities.invokeLater(() -> particleSimulation.setVisible(true));
     }
 
@@ -319,9 +318,9 @@ public class ParticleSimulationServer {
             ParticleSimulationServer server = new ParticleSimulationServer(port);
             new Thread(server::start).start();
             
-            particleSimulation = new ParticleSimulation(true);
+            particleSimulation = new ParticleSimulation();
             particleSimulation.simulationPanel.setServer(server);
-            displayGUI(true);
+            displayGUI();
         } catch (IOException e) {
             System.err.println("Error reading config or starting server: " + e.getMessage());
         }

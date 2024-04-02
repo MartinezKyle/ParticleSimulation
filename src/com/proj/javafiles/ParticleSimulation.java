@@ -41,7 +41,7 @@ public class ParticleSimulation extends JFrame{
     private JCheckBox opt3 = new JCheckBox();
     private JCheckBox opt4 = new JCheckBox();
     
-    public ParticleSimulation(boolean isDev){
+    public ParticleSimulation(){
         super("Particle Simulation");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1680, 920);
@@ -49,7 +49,7 @@ public class ParticleSimulation extends JFrame{
         setBackground(Color.BLACK);
         setLayout(null);
         //executorService = Executors.newFixedThreadPool(THREAD_COUNT);
-        simulationPanel = new SimulationPanel(isDev);
+        simulationPanel = new SimulationPanel();
         add(simulationPanel);
         createControlPanel();
         add(controlPanel);
@@ -58,9 +58,6 @@ public class ParticleSimulation extends JFrame{
     public void createControlPanel(){
         controlPanel.setBounds(1380, 50, 250, 720);
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
-        // controlPanel.setBackground(Color.WHITE);
-        
-        //"Single Particle", "Multiple Particle, Varying Start", "Multiple Particle, Varying Angle", "Multiple Particle, Varying Velocity"});
 
         particleControlPanel.setLayout(new BoxLayout(particleControlPanel, BoxLayout.Y_AXIS));
         particleFieldControlPanel.setLayout(new GridLayout(0,2));

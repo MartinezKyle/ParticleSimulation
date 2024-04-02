@@ -1,6 +1,6 @@
 #include "ParticleSimulation.hpp"
 
-ParticleSimulation::ParticleSimulation() : simulationPanel(true) {
+ParticleSimulation::ParticleSimulation() : simulationPanel() {
     simulationPanel.setPosition(50, 50);
 }
 
