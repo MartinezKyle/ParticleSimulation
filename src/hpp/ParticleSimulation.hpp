@@ -16,6 +16,8 @@ public:
 
     void addParticle(const json& jsonData);
 
+    SimulationPanel& getSimulationPanel();
+
 private:
     SimulationPanel simulationPanel;
 };

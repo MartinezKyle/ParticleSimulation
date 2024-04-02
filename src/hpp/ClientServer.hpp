@@ -23,4 +23,6 @@ std::vector<char> prepareMessageForJavaUTF(const std::string& message);
 
 std::string decompressGzip(const std::vector<char>& compressedData);
 
+void sendExplorerToServer(asio::ip::tcp::socket& socket, SimulationPanel& SimPanel);
+
 #endif // NETWORK_COMMUNICATION_HPP

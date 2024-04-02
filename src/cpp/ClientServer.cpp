@@ -70,6 +70,24 @@ std::string decompressGzip(const std::vector<char>& compressedData) {
     return decompressedData;
 }
 
+void sendExplorerToServer(asio::ip::tcp::socket& socket, SimulationPanel& SimPanel) {
+    std::shared_ptr<Explorer> explorer = SimPanel.getExplorer();
+    if (explorer) {
+        //std::cout << "ExpExists " << std::endl;
+        double x_coords = explorer->getXCoord();
+        double y_coords = explorer->getYCoord();
+        std::string message = "ExplorerCoordinates " + std::to_string(x_coords) + " " + std::to_string(y_coords);
+        auto formattedMessage = prepareMessageForJavaUTF(message);
+        size_t bytesWritten = asio::write(socket, asio::buffer(formattedMessage));
+        if (bytesWritten == formattedMessage.size()) {
+            std::cout << "Successfully wrote " << bytesWritten << " bytes to the socket." << std::endl;
+        } else {
+            std::cerr << "Error writing to socket. Expected " << formattedMessage.size()
+                      << " bytes but wrote " << bytesWritten << " bytes." << std::endl;
+        }
+    }
+}
+
 int main() {
     const std::string server_ip = "127.0.0.1";
     const std::string server_port = "1234";
@@ -83,6 +101,7 @@ int main() {
     connect(socket, endpoints, ec);
 
     ParticleSimulation simulation;
+    //SimulationPanel SimPanel = simulation.getSimulationPanel();
 
     if (ec) {
         std::cerr << "Failed to connect to server: " << ec.message() << std::endl;
@@ -92,6 +111,13 @@ int main() {
 
     boost::thread simThread([&simulation](){
         simulation.run();
+    });
+
+    boost::thread explorerThread([&socket, &simulation](){
+        while (true) {
+            sendExplorerToServer(socket, simulation.getSimulationPanel());
+            boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+        }
     });
 
     try {
@@ -145,6 +171,7 @@ int main() {
             } catch (const std::exception& e) {
                 std::cerr << "Error handling JSON data: " << e.what() << std::endl;
             }
+
         }
     } catch (std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;

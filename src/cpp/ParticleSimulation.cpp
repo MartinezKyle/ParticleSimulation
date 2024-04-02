@@ -56,3 +56,10 @@ void ParticleSimulation::addParticle(const json& jsonData){
     std::cout << "Called 1 " << std::endl;
     simulationPanel.parseJSONToParticles(jsonData);
 }
+
+//getSimulationPanel method implementation
+SimulationPanel& ParticleSimulation::getSimulationPanel(){
+    return simulationPanel;
+}
+
+
