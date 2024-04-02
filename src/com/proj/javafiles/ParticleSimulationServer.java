@@ -28,7 +28,7 @@ public class ParticleSimulationServer {
             while (!serverSocket.isClosed()) {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connected: " + clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
-                ClientHandler handler = new ClientHandler(clientSocket, explorerPositions, this);
+                ClientHandler handler = new ClientHandler(clientSocket, explorerPositions, this, clientHandlers.size());
                 clientHandlers.add(handler); // Keep track of all connected clients
                 clientExecutor.submit(handler);
                 broadcastSimulationState();
@@ -83,14 +83,17 @@ public class ParticleSimulationServer {
     public class ClientHandler implements Runnable {
         private final Socket clientSocket;
         private final ConcurrentHashMap<Integer, Point> explorerPositions;
+        private final int clientID;
         private ParticleSimulationServer server;
         protected DataOutputStream dos;
         protected DataInputStream dis;
 
-        public ClientHandler(Socket socket, ConcurrentHashMap<Integer, Point> positions, ParticleSimulationServer server) {
+        public ClientHandler(Socket socket, ConcurrentHashMap<Integer, Point> positions, ParticleSimulationServer server, int clientID) {
             this.clientSocket = socket;
             this.explorerPositions = positions;
-            this.server = server; 
+            this.server = server;
+            this.clientID = clientID;
+
         }
 
         @Override
@@ -115,13 +118,14 @@ public class ParticleSimulationServer {
                     } else if ("ExplorerCoordinates".equals(parts[0])){
                         double x = Double.parseDouble(parts[1]);
                         double y = Double.parseDouble(parts[2]);
-                        int index = particleSimulation.simulationPanel.explorerExist(0);
+                        int index = particleSimulation.simulationPanel.explorerExist(clientID); // replace 0 with actual ClientID
                         if (index != -1){
                             particleSimulation.simulationPanel.updateExplorer(index, x, y);
-                            System.out.println("Updating");
+
                         }
                         else {
-                            particleSimulation.simulationPanel.addExplorer(0,x, y);
+                            particleSimulation.simulationPanel.addExplorer(clientID,x, y); // Replace 0 with client ID
+                            System.out.println("ClientID: " + clientID);
                         }
                     }
                     // Handle other commands as needed
