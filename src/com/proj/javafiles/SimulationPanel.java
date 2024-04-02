@@ -58,6 +58,8 @@ public class SimulationPanel extends JPanel{
         this.particles.add(particle);
         particle.setBounds(0,0, 1280,720);
         this.add(particle);
+
+        System.out.println("Particle: " + x + " " + y + " " + angle + " " + velocity);
         
         if (server != null && !server.clientHandlers.isEmpty()){
             server.broadcastParticle(particle);

@@ -161,6 +161,8 @@ public class ParticleSimulationServer {
                         .collect(Collectors.toList());
         
                 state = new SimulationState(particleStates).getParticles();
+                
+                particleStates.forEach(p -> System.out.println("Particle Sent: " + p.getXCoord() + " " + p.getYCoord() + " " + p.getAngle() + " " + p.getVelocity()));
         
             } else if ("Explorers".equals(type)) {
                 if (particleSimulation.simulationPanel.explorers.isEmpty()) {

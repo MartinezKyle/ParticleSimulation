@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <nlohmann/json.hpp>
+#include <atomic>
 
 #include "SimulationPanel.hpp"
 
@@ -12,18 +13,17 @@ class ParticleSimulation {
 public:
     ParticleSimulation();
 
+    void updateSimulationLoop();
     void run();
-
     void setID(const json& jsonData);
-
     void addParticle(const json& jsonData);
-
     void addOtherExplorer(const json& jsonData);
-
+    bool getIsRunning() const;
     SimulationPanel& getSimulationPanel();
 
 private:
     SimulationPanel simulationPanel;
+    std::atomic<bool> isRunning = true;
     int ID = -1;
 };
 

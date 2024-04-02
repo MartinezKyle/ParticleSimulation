@@ -42,7 +42,7 @@ void SimulationPanel::parseJSONToParticles(const json& jsonData) {
             double xcoord = obj.at("xcoord").get<double>();
             double ycoord = obj.at("ycoord").get<double>();
 
-            particles.push_back(std::make_shared<Particle>(angle, velocity, xcoord, ycoord));
+            particles.push_back(std::make_shared<Particle>(xcoord, ycoord, velocity, angle));
         }
     } else {
         double angle = jsonData["angle"];
@@ -50,7 +50,7 @@ void SimulationPanel::parseJSONToParticles(const json& jsonData) {
         double xcoord = jsonData["xcoord"];
         double ycoord = jsonData["ycoord"];
 
-        particles.push_back(std::make_shared<Particle>(angle, velocity, xcoord, ycoord));
+        particles.push_back(std::make_shared<Particle>(xcoord, ycoord, velocity, angle));
     }
 }
 
@@ -96,7 +96,7 @@ const std::shared_ptr<Explorer>& SimulationPanel::getExplorer() const {
 
 void SimulationPanel::updateSimulation() {
     for (auto& particle : particles) {
-        particle->updatePosition(0.00169);
+        particle->updatePosition(0.1);
     }
 
     frameCount++;
@@ -144,8 +144,6 @@ void SimulationPanel::drawFPSInfo(sf::RenderTarget& target) const {
 
     if (timeDiff >= 500) {
         text.setString("FPS: " + std::to_string(previousFPS));
-    } else {
-        text.setString("FPS: Calculating...");
     }
 
     target.draw(text);

@@ -2,6 +2,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.List;
 import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -32,6 +34,8 @@ public class Particle extends JComponent{
         x_coord += getVelocityX() * time;
         y_coord += getVelocityY() * time;
         repaint();
+
+        // System.out.println("vx " + getVelocityX() + "vy " + getVelocityY());
     }
 
     public double getXCoord(){
@@ -49,12 +53,21 @@ public class Particle extends JComponent{
     public double getVelocity() {
         return velocity;
     }
+
     public double getVelocityX() {
-        return velocity * Math.cos(Math.toRadians(angle));
+        double result = velocity * Math.cos(Math.toRadians(angle));
+        return BigDecimal.valueOf(result)
+                         .setScale(4, RoundingMode.HALF_UP)
+                         .doubleValue();
     }
+    
     public double getVelocityY() {
-        return velocity * Math.sin(Math.toRadians(angle));
+        double result = velocity * Math.sin(Math.toRadians(angle));
+        return BigDecimal.valueOf(result)
+                         .setScale(4, RoundingMode.HALF_UP)
+                         .doubleValue();
     }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

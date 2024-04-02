@@ -4,13 +4,23 @@ ParticleSimulation::ParticleSimulation() : simulationPanel(true) {
     simulationPanel.setPosition(50, 50);
 }
 
+void ParticleSimulation::updateSimulationLoop() {
+    while (isRunning) {
+        simulationPanel.updateSimulation();
+        
+        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+    }
+}
+
 void ParticleSimulation::run() {
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Simulation Panel");
-    while (window.isOpen()) {
+    
+    while (window.isOpen() && isRunning) {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 window.close();
+                isRunning = false;
             }
             else if (event.type == sf::Event::MouseButtonPressed && simulationPanel.getExplorer() == nullptr) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
@@ -41,7 +51,7 @@ void ParticleSimulation::run() {
                 }
             }
         }
-        simulationPanel.updateSimulation();
+
         window.clear();
         window.draw(simulationPanel);
         window.display();
@@ -67,6 +77,10 @@ void ParticleSimulation::addParticle(const json& jsonData){
 
 void ParticleSimulation::addOtherExplorer(const json& jsonData){
     simulationPanel.parseJSONToExplorers(jsonData);
+}
+
+bool ParticleSimulation::getIsRunning() const {
+    return isRunning.load();
 }
 
 SimulationPanel& ParticleSimulation::getSimulationPanel(){

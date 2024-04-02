@@ -125,18 +125,25 @@ int main() {
     }
     std::cout << "Connected to server." << std::endl;
 
+    boost::thread simUpdateThread([&simulation](){
+        simulation.updateSimulationLoop();
+        std::cout << "Close 1" << std::endl;
+    });
+
     boost::thread simThread([&simulation](){
         simulation.run();
+        std::cout << "Close 2" << std::endl;
     });
 
     boost::thread explorerThread([&socket, &simulation](){
-        while (true) {
+        while (simulation.getIsRunning()) {
             if (simulation.getSimulationPanel().getExplorer() != nullptr && simulation.getSimulationPanel().getExplorer()->getMove()){
                 sendExplorerToServer(socket, simulation.getSimulationPanel());
                 simulation.getSimulationPanel().getExplorer()->revertMove();
             }
             boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
         }
+        std::cout << "Close 3" << std::endl;
     });
 
     try {
@@ -144,7 +151,7 @@ int main() {
         std::istream input_stream(&buffer);
         std::string line;
 
-        while (true) {
+        while (simulation.getIsRunning()) {
             size_t len = asio::read(socket, buffer, asio::transfer_exactly(2));
             std::vector<unsigned char> lengthBytes(2);
             input_stream.read(reinterpret_cast<char*>(lengthBytes.data()), 2);
@@ -190,7 +197,13 @@ int main() {
         }
     } catch (std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
-    }
+    } 
+
+    std::cout << "Close 4" << std::endl;
+
+    simThread.join();
+    simUpdateThread.join();
+    explorerThread.join();
 
     return 0;
 }

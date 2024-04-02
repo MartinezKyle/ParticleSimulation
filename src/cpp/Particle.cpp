@@ -2,14 +2,15 @@
 
 #include <iostream>
 #include <cmath>
+#include <iomanip>
 #include <SFML/Graphics.hpp>
 #include <corecrt_math_defines.h>
 
 Particle::Particle(double x, double y, double velocity, double angle) 
     : x_coord(x), y_coord(y), velocity(velocity), angle(angle) {
-    shape.setRadius(5); // Set radius of particle
+    shape.setRadius(5); 
     shape.setFillColor(sf::Color::Red);
-    shape.setPosition(x_coord - 5, 720 - y_coord - 5); // Adjust position for drawing
+    shape.setPosition(x_coord - 5, 720 - y_coord - 5); 
 }
 
 void Particle::updatePosition(double time) {
@@ -23,7 +24,9 @@ void Particle::updatePosition(double time) {
     }
     x_coord += getVelocityX() * time;
     y_coord += getVelocityY() * time;
-    shape.setPosition(x_coord - 5, 720 - y_coord - 5); // Adjust position for drawing
+    shape.setPosition(x_coord - 5, 720 - y_coord - 5);
+
+    // std::cout << "velocityx " << getVelocityX() << "velocityy " << getVelocityY() << std::endl;
 }
 
 double Particle::getXCoord() const {
@@ -42,12 +45,15 @@ double Particle::getVelocity() const {
     return velocity;
 }
 
+
 double Particle::getVelocityX() const {
-    return velocity * std::cos(angle * M_PI / 180.0);
+    double result = velocity * cos(angle * M_PI / 180.0);
+    return std::round(result * 10000.0) / 10000.0; 
 }
 
 double Particle::getVelocityY() const {
-    return velocity * std::sin(angle * M_PI / 180.0);
+    double result = velocity * sin(angle * M_PI / 180.0);
+    return std::round(result * 10000.0) / 10000.0;
 }
 
 void Particle::draw(sf::RenderTarget& target, sf::RenderStates states) const {

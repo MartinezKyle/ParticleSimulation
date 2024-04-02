@@ -22,7 +22,7 @@ private:
     double x_coord;
     double y_coord;
     sf::CircleShape shape;
-    bool moved;
+    std::atomic<bool> moved;
     int clientID;
 };
 
