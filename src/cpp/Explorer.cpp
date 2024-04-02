@@ -40,6 +40,7 @@ void Explorer::moveUp() {
 void Explorer::moveDown() {
     y_coord += 5;
     shape.setPosition(x_coord, y_coord); 
+    moved = true;
 }
 
 void Explorer::moveLeft() {
