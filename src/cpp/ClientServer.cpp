@@ -8,14 +8,17 @@
 #include <sstream>
 #include <iomanip>
 #include <zlib.h>
+#include <fstream>
 #include <nlohmann/json.hpp>
 #include <boost/thread.hpp>
+#include <boost/filesystem.hpp>
 
 #include "ParticleSimulation.hpp"
 
 using boost::asio::ip::tcp;
 namespace asio = boost::asio;
 using boost::system::error_code;
+namespace fs = boost::filesystem;
 using json = nlohmann::json;
 
 std::vector<char> prepareMessageForJavaUTF(const std::string& message) {
@@ -89,9 +92,25 @@ void sendExplorerToServer(asio::ip::tcp::socket& socket, SimulationPanel& SimPan
 }
 
 int main() {
-    const std::string server_ip = "127.0.0.1";
-    const std::string server_port = "1234";
-    std::cout << "Main" << std::endl;
+    std::cout << "Current Path: " << fs::current_path() << std::endl;
+    
+    fs::path currentPath = fs::current_path();
+    fs::path configPath = currentPath.parent_path().parent_path() / "config.json";
+
+    std::ifstream configFile(configPath.string());
+    json configJson;
+
+    if (configFile.is_open()) {
+        configFile >> configJson;
+        configFile.close();
+    } else {
+        std::cerr << "Could not open config file: " << configPath.string() << " - " << std::strerror(errno) << std::endl;
+        return 1;
+    }
+
+    std::string server_ip = configJson.value("ip", "127.0.0.1"); 
+    std::string server_port = configJson.value("port", "1234");
+    std::cout << "Configured to connect to server at " << server_ip << ":" << server_port << std::endl;
 
     asio::io_context io_context;
     tcp::resolver resolver(io_context);
@@ -101,7 +120,6 @@ int main() {
     connect(socket, endpoints, ec);
 
     ParticleSimulation simulation;
-    //SimulationPanel SimPanel = simulation.getSimulationPanel();
 
     if (ec) {
         std::cerr << "Failed to connect to server: " << ec.message() << std::endl;

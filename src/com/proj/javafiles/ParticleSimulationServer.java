@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 import javax.swing.SwingUtilities;
 import java.nio.charset.StandardCharsets;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ParticleSimulationServer {
@@ -276,16 +278,20 @@ public class ParticleSimulationServer {
     }
 
     public static void main(String[] args) {
-        int port = 1234;
+        String configFile = "config.json";
+        ObjectMapper mapper = new ObjectMapper();
         try {
+            JsonNode config = mapper.readTree(new File(configFile));
+            int port = config.get("port").asInt(); 
+            
             ParticleSimulationServer server = new ParticleSimulationServer(port);
             new Thread(server::start).start();
-            // Assuming ParticleSimulation constructor does not require server as parameter
+            
             particleSimulation = new ParticleSimulation(true);
             particleSimulation.simulationPanel.setServer(server);
             displayGUI(true);
         } catch (IOException e) {
-            System.err.println("Server failed to start: " + e.getMessage());
+            System.err.println("Error reading config or starting server: " + e.getMessage());
         }
     }
 }
