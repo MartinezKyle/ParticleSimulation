@@ -102,12 +102,20 @@ public class ParticleSimulationServer {
                 while (true) { // Keep listening for commands
                     String command = dis.readUTF(); // This will block until a command is received
         
-                    System.out.println("Command:" + command);
+                    System.out.println("Command: " + command);
+                    String[] parts = command.split(" ");
+                    for (String part: parts){
+                        System.out.println(part);
+                    }
                     if ("connect".equals(command)) {
                         dos.writeUTF("connected");
                         sendState(); // Send initial state upon connection
                     } else if ("disconnect".equals(command)) { // Example disconnect command
                         break; // Exit the loop if "disconnect" command is received
+                    } else if ("ExplorerCoordinates".equals(parts[0])){
+                        double x = Double.parseDouble(parts[1]);
+                        double y = Double.parseDouble(parts[2]);
+                        particleSimulation.simulationPanel.addExplorer(x, y);
                     }
                     // Handle other commands as needed
                 }
