@@ -17,7 +17,6 @@
 using json = nlohmann::json;
 
 SimulationPanel::SimulationPanel(bool isDev) : isDevMode(isDev) {
-    setServer(nullptr);
     explorer = nullptr;
     frameCount = 0;
     previousFPS = 0;
@@ -28,10 +27,6 @@ SimulationPanel::SimulationPanel(bool isDev) : isDevMode(isDev) {
     if (!font.loadFromFile("../../lib/calibri.ttf")) {
         std::cerr << "Failed to load font file" << std::endl;
     }
-}
-
-void SimulationPanel::setServer(void* server) {
-    // Not implemented for this example
 }
 
 void SimulationPanel::parseJSONToParticles(const json& jsonData) {
@@ -54,7 +49,7 @@ void SimulationPanel::parseJSONToParticles(const json& jsonData) {
     }
 }
 
-void SimulationPanel::parseJSONToExplorers(const json& jsonData) {
+void SimulationPanel::parseJSONToExplorers(const json& jsonData, const std::string& type) {
     auto updateOrAddExplorer = [this](int id, double xcoord, double ycoord) {
         auto it = std::find_if(explorers.begin(), explorers.end(),
             [id](const std::shared_ptr<Explorer>& explorer) { return explorer->getID() == id; });
@@ -66,23 +61,47 @@ void SimulationPanel::parseJSONToExplorers(const json& jsonData) {
         }
     };
 
-    if (jsonData.is_array()) {
-        for (const auto& obj : jsonData) {
-            int id = obj.at("clientID").get<int>();
-            double xcoord = obj.at("xcoord").get<double>();
-            double ycoord = obj.at("ycoord").get<double>();
+    auto removeExplorer = [this](int id) {
+        auto it = std::find_if(explorers.begin(), explorers.end(),
+            [id](const std::shared_ptr<Explorer>& explorer) { return explorer->getID() == id; });
+
+        if (it != explorers.end()) {
+            explorers.erase(it);
+        } 
+    };
+
+    if (type == "add"){
+        if (jsonData.is_array()) {
+            for (const auto& obj : jsonData) {
+                int id = obj.at("clientID").get<int>();
+                double xcoord = obj.at("xcoord").get<double>();
+                double ycoord = obj.at("ycoord").get<double>();
+
+                updateOrAddExplorer(id, xcoord, ycoord);
+            }
+        } else {
+            int id = jsonData["clientID"].get<int>();
+            double xcoord = jsonData["xcoord"].get<double>();
+            double ycoord = jsonData["ycoord"].get<double>();
 
             updateOrAddExplorer(id, xcoord, ycoord);
         }
+
+        std::cout << "Explorers size: " << explorers.size() << std::endl;
     } else {
-        int id = jsonData["clientID"].get<int>();
-        double xcoord = jsonData["xcoord"].get<double>();
-        double ycoord = jsonData["ycoord"].get<double>();
+        if (jsonData.is_array()) {
+            for (const auto& obj : jsonData) {
+                int id = obj.at("clientID").get<int>();
 
-        updateOrAddExplorer(id, xcoord, ycoord);
+                removeExplorer(id);
+            }
+        } else {
+            int id = jsonData["clientID"].get<int>();
+
+            removeExplorer(id);
+        }
     }
-
-    std::cout << "Explorers size: " << explorers.size() << std::endl;
+    
 }
 
 void SimulationPanel::addExplorer(int ID, double x, double y) {

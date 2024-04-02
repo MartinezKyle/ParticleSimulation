@@ -188,6 +188,8 @@ int main() {
                     simulation.addParticle(jsonParsed);
                 } else if ("Explorers" == dataType){
                     simulation.addOtherExplorer(jsonParsed);
+                } else if ("Remove" == dataType){
+                    simulation.removeExplorer(jsonParsed);
                 } 
 
             } catch (const std::exception& e) {

@@ -5,6 +5,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -198,5 +199,19 @@ public class SimulationPanel extends JPanel{
         this.isDevMode = isDev;
         requestFocusInWindow();
     }
+
+    public void removeExplorerById(int idToRemove) {
+        synchronized (explorers) { 
+            Iterator<Explorer> iterator = explorers.iterator();
+            while (iterator.hasNext()) {
+                Explorer explorer = iterator.next();
+                if (explorer.getClientID() == idToRemove) { 
+                    iterator.remove();
+                    break; 
+                }
+            }
+        }
+    }
+    
 
 }

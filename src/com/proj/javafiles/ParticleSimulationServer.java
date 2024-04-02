@@ -17,8 +17,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class ParticleSimulationServer {
     private static ParticleSimulation particleSimulation;
     private ServerSocket serverSocket;
+    
     private final ExecutorService clientExecutor = Executors.newCachedThreadPool();
-    // Added: A list to keep track of all client handlers for broadcasting updates
     public final List<ClientHandler> clientHandlers = new CopyOnWriteArrayList<>();
 
     public ParticleSimulationServer(int port) throws IOException {
@@ -52,7 +52,6 @@ public class ParticleSimulationServer {
         }
     }
 
-    // Added: A method to broadcast the simulation state to all connected clients
     public void broadcastSimulationState() {
         clientHandlers.forEach(handler -> {
             try {
@@ -85,6 +84,20 @@ public class ParticleSimulationServer {
         });
     }
 
+    public void broadcastRemoveExplorer(int clientID) {
+        clientHandlers.forEach(handler -> {
+            try {
+                handler.sendID("Remove", clientID);
+            } catch (IOException e) {
+                System.err.println("Error broadcasting state: " + e.getMessage());
+            }
+        });
+    }
+
+    public ParticleSimulation getParticleSimulation(){
+        return particleSimulation;
+    }
+
     public class ClientHandler implements Runnable {
         private final Socket clientSocket;
         private final int clientID;
@@ -100,7 +113,7 @@ public class ParticleSimulationServer {
             dos = new DataOutputStream(clientSocket.getOutputStream());
             dis = new DataInputStream(clientSocket.getInputStream());
 
-            sendID();
+            sendID("ID", clientID);
         }
 
         @Override
@@ -130,7 +143,7 @@ public class ParticleSimulationServer {
 
                         server.broadcastExplorer(new Explorer(clientID, x, y), clientID);
                     }
-                    // Handle other commands as needed
+                    
                 }
             } catch (IOException e) {
                 System.out.println("Client handler exception: " + e.getMessage());
@@ -140,8 +153,10 @@ public class ParticleSimulationServer {
                 } catch (IOException e) {
                     System.out.println("Error closing client socket: " + e.getMessage());
                 }
-                // Remove this handler from the server's list upon disconnection
+                
                 server.clientHandlers.remove(this);
+                server.getParticleSimulation().simulationPanel.removeExplorerById(clientID);
+                server.broadcastRemoveExplorer(clientID);
                 System.out.println("Client disconnected and handler removed.");
             }
         } 
@@ -222,7 +237,6 @@ public class ParticleSimulationServer {
             String typeParticle = "Particles";
             String typeExplorer = "Explorers";
         
-            // Serialize your state here (this is just an example)
             byte[] serializedParticleState = serializeSimulationState(typeParticle);
             byte[] serializedExplorerState = serializeSimulationState(typeExplorer);
         
@@ -236,10 +250,8 @@ public class ParticleSimulationServer {
         }
 
         public void sendParticle(Particle p) throws IOException {
-            // Example type indicators
             String typeParticle = "Particles";
         
-            // Serialize your state here (this is just an example)
             byte[] serializedParticleState = serializeParticle(p);
         
             if (serializedParticleState.length > 0) {
@@ -250,7 +262,6 @@ public class ParticleSimulationServer {
         public void sendExplorer(Explorer e) throws IOException {
             String typeExplorer = "Explorers";
         
-            // Serialize your state here (this is just an example)
             byte[] serializedExplorerState = serializeExplorer(e);
             
             if (serializedExplorerState.length > 0) {
@@ -258,12 +269,11 @@ public class ParticleSimulationServer {
             }
         }
 
-        public void sendID() throws IOException {
-            String typeID = "ID";
+        public void sendID(String type, int ClientID) throws IOException {
             
             ObjectMapper mapper = new ObjectMapper();
             HashMap<String, Integer> clientIDMap = new HashMap<>();
-            clientIDMap.put("clientID", clientID);
+            clientIDMap.put("clientID", ClientID);
             String json = mapper.writeValueAsString(clientIDMap);
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -271,7 +281,7 @@ public class ParticleSimulationServer {
                 gzipOut.write(json.getBytes(StandardCharsets.UTF_8));
             } 
             
-            sendTypedMessage(typeID, baos.toByteArray());
+            sendTypedMessage(type, baos.toByteArray());
         }
         
         private void sendTypedMessage(String type, byte[] data) throws IOException {

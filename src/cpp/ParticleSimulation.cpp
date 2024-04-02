@@ -76,7 +76,11 @@ void ParticleSimulation::addParticle(const json& jsonData){
 }
 
 void ParticleSimulation::addOtherExplorer(const json& jsonData){
-    simulationPanel.parseJSONToExplorers(jsonData);
+    simulationPanel.parseJSONToExplorers(jsonData, "add");
+}
+
+void ParticleSimulation::removeExplorer(const json& jsonData){
+    simulationPanel.parseJSONToExplorers(jsonData, "remove");
 }
 
 bool ParticleSimulation::getIsRunning() const {
