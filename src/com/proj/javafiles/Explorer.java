@@ -4,8 +4,10 @@ import java.awt.*;
 public class Explorer extends JComponent {
     public double x_coord;
     public double y_coord;
+    public int clientID;
 
-    public Explorer(double x, double y){
+    public Explorer(int ID, double x, double y){
+        this.clientID = ID;
         this.x_coord = x;
         this.y_coord = y;
         this.setSize(20, 20); 
@@ -18,6 +20,13 @@ public class Explorer extends JComponent {
 
     public double getYCoord() {
         return y_coord;
+    }
+
+    public int getClientID(){ return clientID; }
+
+    public void updateCoords(double x, double y){
+        x_coord = x;
+        y_coord = y;
     }
 
     @Override

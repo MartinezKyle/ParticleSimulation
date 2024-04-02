@@ -88,14 +88,25 @@ public class SimulationPanel extends JPanel{
         }
     }
 
-    public void addExplorer(double x, double y){
-        if (explorer != null){
-            this.remove(explorer);
-        }
-        explorer = new Explorer(x, y);
+    public void addExplorer(int clientID, double x, double y){
+        explorer = new Explorer(clientID, x, y);
         explorer.setBounds(0,0, 1280,720);
+        explorers.add(explorer);
         this.add(explorer);
         SwingUtilities.invokeLater(this::repaint);
+    }
+
+    public int explorerExist(int clientID){
+        for (int i = 0; i < explorers.size(); i++){
+            if (clientID == explorers.get(i).getClientID()){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public void updateExplorer(int index, double x, double y){
+        explorers.get(index).updateCoords(x,y);
     }
 
     @Override
@@ -183,7 +194,7 @@ public class SimulationPanel extends JPanel{
                     double x = e.getX();
                     double y = e.getY();
                     requestFocusInWindow();
-                    addExplorer(x, y);
+                    addExplorer(0,x, y);
                 }
             }
         });

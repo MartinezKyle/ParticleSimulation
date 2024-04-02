@@ -115,7 +115,14 @@ public class ParticleSimulationServer {
                     } else if ("ExplorerCoordinates".equals(parts[0])){
                         double x = Double.parseDouble(parts[1]);
                         double y = Double.parseDouble(parts[2]);
-                        particleSimulation.simulationPanel.addExplorer(x, y);
+                        int index = particleSimulation.simulationPanel.explorerExist(0);
+                        if (index != -1){
+                            particleSimulation.simulationPanel.updateExplorer(index, x, y);
+                            System.out.println("Updating");
+                        }
+                        else {
+                            particleSimulation.simulationPanel.addExplorer(0,x, y);
+                        }
                     }
                     // Handle other commands as needed
                 }
