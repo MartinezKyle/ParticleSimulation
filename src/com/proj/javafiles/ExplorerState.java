@@ -1,13 +1,14 @@
 public class ExplorerState {
     private double x_coord;
     private double y_coord;
+    private int client_id;
 
-    public ExplorerState(double x, double y) {
+    public ExplorerState(int client_id, double x, double y) {
+        this.client_id = client_id;
         this.x_coord = x;
         this.y_coord = y;
     }
 
-    // Getters
     public double getXCoord() {
         return x_coord;
     }
@@ -16,5 +17,6 @@ public class ExplorerState {
         return y_coord;
     }
 
-    // Setters if needed
+    public int getClientID(){ return client_id; }
+
 }

@@ -14,12 +14,17 @@ public:
 
     void run();
 
+    void setID(const json& jsonData);
+
     void addParticle(const json& jsonData);
+
+    void addOtherExplorer(const json& jsonData);
 
     SimulationPanel& getSimulationPanel();
 
 private:
     SimulationPanel simulationPanel;
+    int ID = -1;
 };
 
 #endif // PARTICLE_SIMULATION_HPP

@@ -1,12 +1,9 @@
-// Include the corresponding header file
 #include "ParticleSimulation.hpp"
 
-// Constructor implementation
 ParticleSimulation::ParticleSimulation() : simulationPanel(true) {
     simulationPanel.setPosition(50, 50);
 }
 
-// run method implementation
 void ParticleSimulation::run() {
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Simulation Panel");
     while (window.isOpen()) {
@@ -15,10 +12,10 @@ void ParticleSimulation::run() {
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
-            else if (event.type == sf::Event::MouseButtonPressed) {
+            else if (event.type == sf::Event::MouseButtonPressed && simulationPanel.getExplorer() == nullptr) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     auto mousePos = sf::Mouse::getPosition(window);
-                    simulationPanel.addExplorer(mousePos.x, mousePos.y);
+                    simulationPanel.addExplorer(this->ID, mousePos.x, mousePos.y);
                     std::cout << "Added explorer at: " << mousePos.x << ", " << mousePos.y << std::endl;
                 }
             }
@@ -51,13 +48,27 @@ void ParticleSimulation::run() {
     }
 }
 
-// addParticle method implementation
+void ParticleSimulation::setID(const json& jsonData) { 
+    if (!jsonData.is_object()) {
+        std::cerr << "Expected jsonData to be an object, got: " << jsonData.type_name() << std::endl;
+        return;
+    }
+
+    if (jsonData.contains("clientID") && jsonData["clientID"].is_number()) {
+        this->ID = jsonData["clientID"];
+    } else {
+        std::cerr << "Missing or invalid 'clientID' in jsonData." << std::endl;
+    }
+}
+
 void ParticleSimulation::addParticle(const json& jsonData){
-    std::cout << "Called 1 " << std::endl;
     simulationPanel.parseJSONToParticles(jsonData);
 }
 
-//getSimulationPanel method implementation
+void ParticleSimulation::addOtherExplorer(const json& jsonData){
+    simulationPanel.parseJSONToExplorers(jsonData);
+}
+
 SimulationPanel& ParticleSimulation::getSimulationPanel(){
     return simulationPanel;
 }

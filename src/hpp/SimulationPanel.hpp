@@ -22,7 +22,8 @@ public:
     SimulationPanel(bool isDev);
     void setServer(void* server);
     void parseJSONToParticles(const json& jsonData);
-    void addExplorer(double x, double y);
+    void parseJSONToExplorers(const json& jsonData);
+    void addExplorer(int ID, double x, double y);
     const std::shared_ptr<Explorer>& getExplorer() const;
     void updateSimulation();
     void changeDevMode(bool isDev);
@@ -30,6 +31,7 @@ public:
 
 private:
     std::vector<std::shared_ptr<Particle>> particles;
+    std::vector<std::shared_ptr<Explorer>> explorers;
     std::shared_ptr<Explorer> explorer;
     bool isDevMode;
     int frameCount;

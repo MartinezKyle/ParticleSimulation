@@ -22,15 +22,13 @@ namespace fs = boost::filesystem;
 using json = nlohmann::json;
 
 std::vector<char> prepareMessageForJavaUTF(const std::string& message) {
-    // Java's DataInputStream.readUTF() expects the first two bytes to contain the length
-    // of the string in UTF format, followed by the string itself.
-    unsigned short len = htons(static_cast<unsigned short>(message.length())); // Convert length to network byte order
+    unsigned short len = htons(static_cast<unsigned short>(message.length()));
 
     std::vector<char> formattedMessage;
-    formattedMessage.resize(2 + message.length()); // 2 bytes for the length, plus the message length
+    formattedMessage.resize(2 + message.length());
 
-    std::memcpy(formattedMessage.data(), &len, 2); // Copy the length to the first 2 bytes
-    std::memcpy(formattedMessage.data() + 2, message.c_str(), message.length()); // Copy the string data
+    std::memcpy(formattedMessage.data(), &len, 2); 
+    std::memcpy(formattedMessage.data() + 2, message.c_str(), message.length()); 
 
     return formattedMessage;
 }
@@ -55,10 +53,10 @@ std::string decompressGzip(const std::vector<char>& compressedData) {
         strm.avail_out = sizeof(outbuffer);
         strm.next_out = reinterpret_cast<Bytef*>(outbuffer);
         ret = inflate(&strm, Z_NO_FLUSH);
-        assert(ret != Z_STREAM_ERROR);  // state not clobbered
+        assert(ret != Z_STREAM_ERROR);  
         switch (ret) {
             case Z_NEED_DICT:
-                ret = Z_DATA_ERROR;     // and fall through
+                ret = Z_DATA_ERROR;     
             case Z_DATA_ERROR:
             case Z_MEM_ERROR:
                 inflateEnd(&strm);
@@ -83,7 +81,7 @@ void sendExplorerToServer(asio::ip::tcp::socket& socket, SimulationPanel& SimPan
         auto formattedMessage = prepareMessageForJavaUTF(message);
         size_t bytesWritten = asio::write(socket, asio::buffer(formattedMessage));
         if (bytesWritten == formattedMessage.size()) {
-            std::cout << "Successfully wrote " << bytesWritten << " bytes to the socket." << std::endl;
+            // std::cout << "Successfully wrote " << bytesWritten << " bytes to the socket." << std::endl;
         } else {
             std::cerr << "Error writing to socket. Expected " << formattedMessage.size()
                       << " bytes but wrote " << bytesWritten << " bytes." << std::endl;
@@ -133,7 +131,10 @@ int main() {
 
     boost::thread explorerThread([&socket, &simulation](){
         while (true) {
-            sendExplorerToServer(socket, simulation.getSimulationPanel());
+            if (simulation.getSimulationPanel().getExplorer() != nullptr && simulation.getSimulationPanel().getExplorer()->getMove()){
+                sendExplorerToServer(socket, simulation.getSimulationPanel());
+                simulation.getSimulationPanel().getExplorer()->revertMove();
+            }
             boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
         }
     });
@@ -144,47 +145,43 @@ int main() {
         std::string line;
 
         while (true) {
-            // First, read the 2-byte length prefix (big-endian) for the UTF string
             size_t len = asio::read(socket, buffer, asio::transfer_exactly(2));
             std::vector<unsigned char> lengthBytes(2);
             input_stream.read(reinterpret_cast<char*>(lengthBytes.data()), 2);
-            unsigned int length = (lengthBytes[0] << 8) | lengthBytes[1]; // Convert to unsigned int
+            unsigned int length = (lengthBytes[0] << 8) | lengthBytes[1]; 
 
-            // Read the UTF string of the given length (dataType)
             std::string dataType;
             dataType.resize(length);
             len = asio::read(socket, buffer, asio::transfer_exactly(length));
             input_stream.read(&dataType[0], length);
-            // If there's a null terminator in the string, remove it
             dataType.erase(std::remove(dataType.begin(), dataType.end(), '\0'), dataType.end());
 
             std::cout << "Data Type: " << dataType << std::endl;
 
-            // Read the length of the JSON data
             len = asio::read(socket, buffer, asio::transfer_exactly(4));
             std::vector<unsigned char> jsonLengthBytes(4);
             input_stream.read(reinterpret_cast<char*>(jsonLengthBytes.data()), 4);
             unsigned int jsonLength = (jsonLengthBytes[0] << 24) |
                                     (jsonLengthBytes[1] << 16) |
                                     (jsonLengthBytes[2] << 8)  |
-                                    jsonLengthBytes[3]; // Convert to unsigned int
+                                    jsonLengthBytes[3];
 
-            // Read the JSON data of the given length
             std::vector<char> jsonData(jsonLength);
             len = asio::read(socket, buffer, asio::transfer_exactly(jsonLength));
             input_stream.read(jsonData.data(), jsonLength);
 
-            // Now, jsonData contains the compressed JSON data, decompress and parse it
             try {
                 std::string decompressedJson = decompressGzip(jsonData);
                 auto jsonParsed = json::parse(decompressedJson);
                 std::cout << "JSON Data: " << jsonParsed.dump(4) << std::endl;
                 
-                if ("Particles" == dataType){
+                if ("ID" == dataType){
+                    simulation.setID(jsonParsed);
+                } else if ("Particles" == dataType){
                     simulation.addParticle(jsonParsed);
                 } else if ("Explorers" == dataType){
-
-                }
+                    simulation.addOtherExplorer(jsonParsed);
+                } 
 
             } catch (const std::exception& e) {
                 std::cerr << "Error handling JSON data: " << e.what() << std::endl;

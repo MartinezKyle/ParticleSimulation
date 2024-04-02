@@ -27,7 +27,6 @@ public class SimulationPanel extends JPanel{
     public long lastFPSCheck = 0;
 
     public List<Explorer> explorers = Collections.synchronizedList(new ArrayList<Explorer>());
-    public Explorer explorer;
     private boolean isDevMode = true;
 
     private ParticleSimulationServer server;
@@ -37,7 +36,6 @@ public class SimulationPanel extends JPanel{
         setBounds(50, 50, SIMULATION_WIDTH, SIMULATION_HEIGHT);
         setBackground(Color.WHITE);
         setFocusable(true);
-        initializeListeners();
         executorService.execute(() -> {
             while (true) {
                 updateSimulation();
@@ -89,10 +87,7 @@ public class SimulationPanel extends JPanel{
     }
 
     public void addExplorer(int clientID, double x, double y){
-        explorer = new Explorer(clientID, x, y);
-        explorer.setBounds(0,0, 1280,720);
-        explorers.add(explorer);
-        this.add(explorer);
+        explorers.add(new Explorer(clientID, x, y));
         SwingUtilities.invokeLater(this::repaint);
     }
 
@@ -105,43 +100,58 @@ public class SimulationPanel extends JPanel{
         return -1;
     }
 
-    public void updateExplorer(int index, double x, double y){
-        explorers.get(index).updateCoords(x,y);
-    }
+    public void updateExplorer(int id, double x, double y) {
+        for (Explorer explorer : explorers) {
+            if (explorer.getClientID() == id) {
+                explorer.updateCoords(x, y);
+                break; 
+            }
+        }
+    }    
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
     
-        Graphics2D g3 = (Graphics2D) g.create();
+        // Graphics2D g3 = (Graphics2D) g.create();
     
-        if (!isDevMode && explorer != null) {
-            setBackground(Color.BLACK);
-            Graphics2D g2 = (Graphics2D) g;
+        // if (!isDevMode && explorer != null) {
+        //     setBackground(Color.BLACK);
+        //     Graphics2D g2 = (Graphics2D) g;
 
-            double zoomFactor = 1.94;  
-            applyZoomAndCenter(g2, explorer.x_coord, explorer.y_coord, zoomFactor);
+        //     double zoomFactor = 1.94;  
+        //     applyZoomAndCenter(g2, explorer.x_coord, explorer.y_coord, zoomFactor);
             
-            g2.setColor(Color.WHITE);
-            g2.fillRect(0, 0, getWidth(), getHeight());
+        //     g2.setColor(Color.WHITE);
+        //     g2.fillRect(0, 0, getWidth(), getHeight());
 
-            for (Particle particle : particles) {
-                particle.paintComponent(g2);
-            }
+        //     for (Particle particle : particles) {
+        //         particle.paintComponent(g2);
+        //     }
     
-            explorer.paintComponent(g2);
-        } else {
-            setBackground(Color.WHITE);
-            for (Particle particle : particles) {
-                particle.paintComponent(g);
-            }
+        //     explorer.paintComponent(g2);
+        // } else {
+        //     setBackground(Color.WHITE);
+        //     for (Particle particle : particles) {
+        //         particle.paintComponent(g);
+        //     }
 
-            if (explorer != null) {
-                explorer.paintComponent(g);
-            }
+        //     if (explorer != null) {
+        //         explorer.paintComponent(g);
+        //     }
+        // }
+
+        setBackground(Color.WHITE);
+
+        for (Particle particle : particles) {
+            particle.paintComponent(g);
         }
 
-        drawFPSInfo(g3);
+        for (Explorer explorer : explorers) {
+            explorer.paintComponent(g);
+        }
+
+        drawFPSInfo(g);
     }
     
     private void applyZoomAndCenter(Graphics2D g2d, double x, double y, double zoomFactor) {
@@ -156,7 +166,7 @@ public class SimulationPanel extends JPanel{
     }
     
     private void drawFPSInfo(Graphics g) {
-        g.setColor(Color.GRAY);
+        g.setColor(Color.GREEN);
         g.setFont(new Font("Arial", Font.BOLD, 12));
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastFPSCheck >= 500) {
@@ -187,38 +197,4 @@ public class SimulationPanel extends JPanel{
         requestFocusInWindow();
     }
 
-    private void initializeListeners() {
-        addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                if (!isDevMode) { 
-                    double x = e.getX();
-                    double y = e.getY();
-                    requestFocusInWindow();
-                    addExplorer(0,x, y);
-                }
-            }
-        });
-
-        addKeyListener(new KeyAdapter() {
-            public void keyPressed(KeyEvent e) {
-                if (!isDevMode && explorer != null) { 
-                    int explorerRadius = 10; 
-                    switch (e.getKeyCode()) {
-                        case KeyEvent.VK_W:
-                            explorer.y_coord = Math.max(explorerRadius, explorer.y_coord - 5);
-                            break;
-                        case KeyEvent.VK_A:
-                            explorer.x_coord = Math.max(explorerRadius, explorer.x_coord - 5);
-                            break;
-                        case KeyEvent.VK_S:
-                            explorer.y_coord = Math.min(SIMULATION_HEIGHT - explorerRadius, explorer.y_coord + 5);
-                            break;
-                        case KeyEvent.VK_D:
-                            explorer.x_coord = Math.min(SIMULATION_WIDTH - explorerRadius, explorer.x_coord + 5);
-                            break;
-                    }
-                }
-            }
-        });
-    }
 }

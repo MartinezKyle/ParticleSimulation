@@ -11,6 +11,7 @@ public class Explorer extends JComponent {
         this.x_coord = x;
         this.y_coord = y;
         this.setSize(20, 20); 
+        this.setBounds(0,0, 1280,720);
         repaint();
     }
 

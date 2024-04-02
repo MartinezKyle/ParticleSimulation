@@ -6,16 +6,17 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
+import java.util.HashMap;
 import javax.swing.SwingUtilities;
 import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ParticleSimulationServer {
     private static ParticleSimulation particleSimulation;
     private ServerSocket serverSocket;
-    private final ConcurrentHashMap<Integer, Point> explorerPositions = new ConcurrentHashMap<>();
     private final ExecutorService clientExecutor = Executors.newCachedThreadPool();
     // Added: A list to keep track of all client handlers for broadcasting updates
     public final List<ClientHandler> clientHandlers = new CopyOnWriteArrayList<>();
@@ -30,8 +31,8 @@ public class ParticleSimulationServer {
             while (!serverSocket.isClosed()) {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connected: " + clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
-                ClientHandler handler = new ClientHandler(clientSocket, explorerPositions, this, clientHandlers.size());
-                clientHandlers.add(handler); // Keep track of all connected clients
+                ClientHandler handler = new ClientHandler(clientSocket, this, clientSocket.getPort());
+                clientHandlers.add(handler); 
                 clientExecutor.submit(handler);
                 broadcastSimulationState();
             }
@@ -72,63 +73,62 @@ public class ParticleSimulationServer {
         });
     }
 
-    public void broadcastExplorer(Explorer explorer) {
+    public void broadcastExplorer(Explorer explorer, int client_id) {
         clientHandlers.forEach(handler -> {
-            try {
-                handler.sendExplorer(explorer);
-            } catch (IOException e) {
-                System.err.println("Error broadcasting state: " + e.getMessage());
+            if (handler.returnID() != client_id) {
+                try {
+                    handler.sendExplorer(explorer);
+                } catch (IOException e) {
+                    System.err.println("Error broadcasting state: " + e.getMessage());
+                }
             }
         });
     }
 
     public class ClientHandler implements Runnable {
         private final Socket clientSocket;
-        private final ConcurrentHashMap<Integer, Point> explorerPositions;
         private final int clientID;
         private ParticleSimulationServer server;
         protected DataOutputStream dos;
         protected DataInputStream dis;
 
-        public ClientHandler(Socket socket, ConcurrentHashMap<Integer, Point> positions, ParticleSimulationServer server, int clientID) {
+        public ClientHandler(Socket socket, ParticleSimulationServer server, int clientID) throws IOException {
             this.clientSocket = socket;
-            this.explorerPositions = positions;
             this.server = server;
             this.clientID = clientID;
 
+            dos = new DataOutputStream(clientSocket.getOutputStream());
+            dis = new DataInputStream(clientSocket.getInputStream());
+
+            sendID();
         }
 
         @Override
         public void run() {
             try {
-                dos = new DataOutputStream(clientSocket.getOutputStream());
-                dis = new DataInputStream(clientSocket.getInputStream());
-
-                while (true) { // Keep listening for commands
-                    String command = dis.readUTF(); // This will block until a command is received
+                while (true) { 
+                    String command = dis.readUTF(); 
         
                     System.out.println("Command: " + command);
                     String[] parts = command.split(" ");
                     for (String part: parts){
                         System.out.println(part);
                     }
-                    if ("connect".equals(command)) {
-                        dos.writeUTF("connected");
-                        sendState(); // Send initial state upon connection
-                    } else if ("disconnect".equals(command)) { // Example disconnect command
-                        break; // Exit the loop if "disconnect" command is received
-                    } else if ("ExplorerCoordinates".equals(parts[0])){
+
+                    if ("ExplorerCoordinates".equals(parts[0])){
                         double x = Double.parseDouble(parts[1]);
                         double y = Double.parseDouble(parts[2]);
-                        int index = particleSimulation.simulationPanel.explorerExist(clientID); // replace 0 with actual ClientID
+                        int index = particleSimulation.simulationPanel.explorerExist(clientID);
+                        System.out.println("Index: " + index);
                         if (index != -1){
-                            particleSimulation.simulationPanel.updateExplorer(index, x, y);
-
+                            particleSimulation.simulationPanel.updateExplorer(clientID, x, y);
                         }
                         else {
-                            particleSimulation.simulationPanel.addExplorer(clientID,x, y); // Replace 0 with client ID
+                            particleSimulation.simulationPanel.addExplorer(clientID,x, y);
                             System.out.println("ClientID: " + clientID);
                         }
+
+                        server.broadcastExplorer(new Explorer(clientID, x, y), clientID);
                     }
                     // Handle other commands as needed
                 }
@@ -169,7 +169,7 @@ public class ParticleSimulationServer {
                 }
         
                 List<ExplorerState> explorerStates = particleSimulation.simulationPanel.explorers.stream()
-                        .map(e -> new ExplorerState(e.getXCoord(), e.getYCoord()))
+                        .map(e -> new ExplorerState(e.getClientID(), e.getXCoord(), e.getYCoord()))
                         .collect(Collectors.toList());
         
                 state = new SimulationState(explorerStates, true).getExplorers();;
@@ -203,7 +203,7 @@ public class ParticleSimulationServer {
         }   
 
         public byte[] serializeExplorer(Explorer e) throws IOException {
-            ExplorerState state = new ExplorerState(e.getXCoord(), e.getYCoord());
+            ExplorerState state = new ExplorerState(e.getClientID(), e.getXCoord(), e.getYCoord());
         
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(state);
@@ -255,6 +255,22 @@ public class ParticleSimulationServer {
                 sendTypedMessage(typeExplorer, serializedExplorerState);
             }
         }
+
+        public void sendID() throws IOException {
+            String typeID = "ID";
+            
+            ObjectMapper mapper = new ObjectMapper();
+            HashMap<String, Integer> clientIDMap = new HashMap<>();
+            clientIDMap.put("clientID", clientID);
+            String json = mapper.writeValueAsString(clientIDMap);
+            
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (GZIPOutputStream gzipOut = new GZIPOutputStream(baos)) {
+                gzipOut.write(json.getBytes(StandardCharsets.UTF_8));
+            } 
+            
+            sendTypedMessage(typeID, baos.toByteArray());
+        }
         
         private void sendTypedMessage(String type, byte[] data) throws IOException {
             dos.flush();
@@ -269,6 +285,10 @@ public class ParticleSimulationServer {
         
             dos.write(data);
             dos.flush();
+        }
+
+        public int returnID(){
+            return this.clientID;
         }
               
     }
