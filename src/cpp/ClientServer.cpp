@@ -146,54 +146,58 @@ int main() {
         std::cout << "Close 3" << std::endl;
     });
 
+    std::cout << "Starting to read from server." << std::endl;
     try {
         asio::streambuf buffer;
         std::istream input_stream(&buffer);
         std::string line;
 
         while (simulation.getIsRunning()) {
-            size_t len = asio::read(socket, buffer, asio::transfer_exactly(2));
-            std::vector<unsigned char> lengthBytes(2);
-            input_stream.read(reinterpret_cast<char*>(lengthBytes.data()), 2);
-            unsigned int length = (lengthBytes[0] << 8) | lengthBytes[1]; 
+            boost::asio::socket_base::bytes_readable command(true);
+            socket.io_control(command);
+            if (command.get() != 0){
+                size_t len = asio::read(socket, buffer, asio::transfer_exactly(2));
+                std::vector<unsigned char> lengthBytes(2);
+                input_stream.read(reinterpret_cast<char*>(lengthBytes.data()), 2);
+                unsigned int length = (lengthBytes[0] << 8) | lengthBytes[1]; 
+                std::string dataType;
+                dataType.resize(length);
+                len = asio::read(socket, buffer, asio::transfer_exactly(length));
+                input_stream.read(&dataType[0], length);
+                dataType.erase(std::remove(dataType.begin(), dataType.end(), '\0'), dataType.end());
 
-            std::string dataType;
-            dataType.resize(length);
-            len = asio::read(socket, buffer, asio::transfer_exactly(length));
-            input_stream.read(&dataType[0], length);
-            dataType.erase(std::remove(dataType.begin(), dataType.end(), '\0'), dataType.end());
+                std::cout << "Data Type: " << dataType << std::endl;
 
-            std::cout << "Data Type: " << dataType << std::endl;
+                len = asio::read(socket, buffer, asio::transfer_exactly(4));
+                std::vector<unsigned char> jsonLengthBytes(4);
+                input_stream.read(reinterpret_cast<char*>(jsonLengthBytes.data()), 4);
+                unsigned int jsonLength = (jsonLengthBytes[0] << 24) |
+                                        (jsonLengthBytes[1] << 16) |
+                                        (jsonLengthBytes[2] << 8)  |
+                                        jsonLengthBytes[3];
 
-            len = asio::read(socket, buffer, asio::transfer_exactly(4));
-            std::vector<unsigned char> jsonLengthBytes(4);
-            input_stream.read(reinterpret_cast<char*>(jsonLengthBytes.data()), 4);
-            unsigned int jsonLength = (jsonLengthBytes[0] << 24) |
-                                    (jsonLengthBytes[1] << 16) |
-                                    (jsonLengthBytes[2] << 8)  |
-                                    jsonLengthBytes[3];
+                std::vector<char> jsonData(jsonLength);
+                len = asio::read(socket, buffer, asio::transfer_exactly(jsonLength));
+                input_stream.read(jsonData.data(), jsonLength);
 
-            std::vector<char> jsonData(jsonLength);
-            len = asio::read(socket, buffer, asio::transfer_exactly(jsonLength));
-            input_stream.read(jsonData.data(), jsonLength);
+                try {
+                    std::string decompressedJson = decompressGzip(jsonData);
+                    auto jsonParsed = json::parse(decompressedJson);
+                    std::cout << "JSON Data: " << jsonParsed.dump(4) << std::endl;
+                    
+                    if ("ID" == dataType){
+                        simulation.setID(jsonParsed);
+                    } else if ("Particles" == dataType){
+                        simulation.addParticle(jsonParsed);
+                    } else if ("Explorers" == dataType){
+                        simulation.addOtherExplorer(jsonParsed);
+                    } else if ("Remove" == dataType){
+                        simulation.removeExplorer(jsonParsed);
+                    } 
 
-            try {
-                std::string decompressedJson = decompressGzip(jsonData);
-                auto jsonParsed = json::parse(decompressedJson);
-                std::cout << "JSON Data: " << jsonParsed.dump(4) << std::endl;
-                
-                if ("ID" == dataType){
-                    simulation.setID(jsonParsed);
-                } else if ("Particles" == dataType){
-                    simulation.addParticle(jsonParsed);
-                } else if ("Explorers" == dataType){
-                    simulation.addOtherExplorer(jsonParsed);
-                } else if ("Remove" == dataType){
-                    simulation.removeExplorer(jsonParsed);
-                } 
-
-            } catch (const std::exception& e) {
-                std::cerr << "Error handling JSON data: " << e.what() << std::endl;
+                } catch (const std::exception& e) {
+                    std::cerr << "Error handling JSON data: " << e.what() << std::endl;
+                }
             }
 
         }
