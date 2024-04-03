@@ -32,27 +32,35 @@ void Explorer::updateCoords(double x, double y){
     }
 
 void Explorer::moveUp() {
-    y_coord -= 5;
-    shape.setPosition(x_coord, y_coord); 
-    moved = true;
+    if (y_coord > 6){
+        y_coord -= 5;
+        shape.setPosition(x_coord, y_coord); 
+        moved = true;
+    }
 }
 
 void Explorer::moveDown() {
-    y_coord += 5;
-    shape.setPosition(x_coord, y_coord); 
-    moved = true;
+    if (y_coord < 697){
+        y_coord += 5;
+        shape.setPosition(x_coord, y_coord); 
+        moved = true;
+    }
 }
 
 void Explorer::moveLeft() {
-    x_coord -= 5;
-    shape.setPosition(x_coord, y_coord); 
-    moved = true;
+    if (x_coord > 6){
+        x_coord -= 5;
+        shape.setPosition(x_coord, y_coord); 
+        moved = true;
+    }
 }
 
 void Explorer::moveRight() {
-    x_coord += 5;
-    shape.setPosition(x_coord, y_coord); 
-    moved = true;
+    if(x_coord < 1256){
+        x_coord += 5;
+        shape.setPosition(x_coord, y_coord); 
+        moved = true;
+    }
 }
 
 void Explorer::revertMove() {

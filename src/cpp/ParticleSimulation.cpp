@@ -14,6 +14,21 @@ void ParticleSimulation::updateSimulationLoop() {
 
 void ParticleSimulation::run() {
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Simulation Panel");
+    window.clear(sf::Color::Black);
+    float borderThickness = 500.0f;
+    sf::RectangleShape borderRect;
+    borderRect.setSize(sf::Vector2f(window.getSize().x, window.getSize().y));
+    borderRect.setFillColor(sf::Color::Transparent);
+    borderRect.setOutlineColor(sf::Color::Black);
+    borderRect.setOutlineThickness(borderThickness);
+    borderRect.setPosition(0, 0);
+
+    window.clear();
+    window.draw(simulationPanel);
+    window.draw(borderRect);
+
+    // Display the contents of the RenderWindow
+    window.display();
     std::shared_ptr<Explorer> explorer = nullptr;
 
     while (window.isOpen() && isRunning) {
@@ -59,8 +74,9 @@ void ParticleSimulation::run() {
             }
         }
 
-        window.clear();
+        window.clear(sf::Color::White);
         window.draw(simulationPanel);
+        window.draw(borderRect);
         window.display();
     }
 }
