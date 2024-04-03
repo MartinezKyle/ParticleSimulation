@@ -14,23 +14,26 @@ void ParticleSimulation::updateSimulationLoop() {
 
 void ParticleSimulation::run() {
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Simulation Panel");
-    
+    std::shared_ptr<Explorer> explorer = nullptr;
+
     while (window.isOpen() && isRunning) {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 window.close();
                 isRunning = false;
+
             }
             else if (event.type == sf::Event::MouseButtonPressed && simulationPanel.getExplorer() == nullptr) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     auto mousePos = sf::Mouse::getPosition(window);
                     simulationPanel.addExplorer(this->ID, mousePos.x, mousePos.y);
+
+                    explorer = simulationPanel.getExplorer();
                     std::cout << "Added explorer at: " << mousePos.x << ", " << mousePos.y << std::endl;
                 }
             }
-            else if (event.type == sf::Event::KeyPressed) {
-                std::shared_ptr<Explorer> explorer = simulationPanel.getExplorer();
+            else if (event.type == sf::Event::KeyPressed && explorer != nullptr) {
                 if (explorer){
                     if (event.key.code == sf::Keyboard::W) {
                         std::cout << "W pressed" << std::endl;
@@ -50,12 +53,25 @@ void ParticleSimulation::run() {
                     }
                 }
             }
+
+            if (explorer != nullptr && explorer->getMove()){
+                applyZoomAndCenter(window, explorer->getXCoord(), explorer->getYCoord());
+            }
         }
 
         window.clear();
         window.draw(simulationPanel);
         window.display();
     }
+}
+
+void ParticleSimulation::applyZoomAndCenter(sf::RenderWindow& window, double x, double y) {
+    sf::Vector2u windowSize = window.getSize();
+    sf::View view(sf::FloatRect(0, 0, windowSize.x, windowSize.y));
+    
+    view.setCenter(sf::Vector2f(x + 10, y + 10));    
+    view.zoom(1 / zoomFactor);
+    window.setView(view);
 }
 
 void ParticleSimulation::setID(const json& jsonData) { 

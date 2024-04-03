@@ -15,6 +15,7 @@ public:
 
     void updateSimulationLoop();
     void run();
+    void applyZoomAndCenter(sf::RenderWindow& window, double x, double y);
 
     void setID(const json& jsonData);
     bool getIsRunning() const;
@@ -28,6 +29,7 @@ public:
 private:
     SimulationPanel simulationPanel;
     std::atomic<bool> isRunning = true;
+    double zoomFactor = 1.94;
     int ID = -1;
 };
 

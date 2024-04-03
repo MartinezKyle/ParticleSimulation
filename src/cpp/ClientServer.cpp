@@ -203,9 +203,5 @@ int main() {
 
     std::cout << "Close 4" << std::endl;
 
-    simThread.join();
-    simUpdateThread.join();
-    explorerThread.join();
-
     return 0;
 }

@@ -6,7 +6,7 @@
 
 Explorer::Explorer(int clientID, double x, double y) : x_coord(x), y_coord(y) {
     this->clientID = clientID;
-    shape.setRadius(10); 
+    shape.setRadius(radius); 
     shape.setFillColor(sf::Color::Blue);
     shape.setPosition(x_coord, y_coord); 
     moved = true;

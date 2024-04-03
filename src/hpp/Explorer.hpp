@@ -28,6 +28,7 @@ private:
     sf::CircleShape shape;
     std::atomic<bool> moved;
     int clientID;
+    int radius = 10;
 };
 
 #endif // EXPLORER_H
