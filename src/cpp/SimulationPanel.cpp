@@ -101,7 +101,6 @@ void SimulationPanel::parseJSONToExplorers(const json& jsonData, const std::stri
             removeExplorer(id);
         }
     }
-    
 }
 
 void SimulationPanel::addExplorer(int ID, double x, double y) {
@@ -119,18 +118,22 @@ void SimulationPanel::updateSimulation() {
     }
 
     frameCount++;
+    
     auto currentTime = std::chrono::high_resolution_clock::now();
     auto timeDiff = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastFPSCheck).count();
+
     if (timeDiff >= 500) {
-        frameCount /= (timeDiff / 1000.0);
-        previousFPS = frameCount;
+        previousFPS = frameCount / (timeDiff / 1000.0);
         frameCount = 0;
-        lastFPSCheck = currentTime;
+        lastFPSCheck = currentTime; 
     }
 }
 
 void SimulationPanel::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+    sf::View originalView = target.getView();
+    
     target.clear(sf::Color::White);
+
     for (const auto& particle : particles) {
         target.draw(*particle);
     }
@@ -139,11 +142,15 @@ void SimulationPanel::draw(sf::RenderTarget& target, sf::RenderStates states) co
         target.draw(*others);
     }
 
-     if (explorer) {
+    if (explorer) {
         target.draw(*explorer);
     }
     
-    drawFPSInfo(target);   
+    target.setView(target.getDefaultView());
+    
+    drawFPSInfo(target);
+
+    target.setView(originalView);   
 }
 
 
@@ -154,12 +161,7 @@ void SimulationPanel::drawFPSInfo(sf::RenderTarget& target) const {
     text.setFillColor(sf::Color::Green);
     text.setPosition(10, 20);
 
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    auto timeDiff = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastFPSCheck).count();
-
-    if (timeDiff >= 500) {
-        text.setString("FPS: " + std::to_string(previousFPS));
-    }
+    text.setString("FPS: " + std::to_string(static_cast<int>(previousFPS)));
 
     target.draw(text);
 }
