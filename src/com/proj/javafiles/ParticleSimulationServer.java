@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class ParticleSimulationServer {
     private static ParticleSimulation particleSimulation;
     private ServerSocket serverSocket;
+    private long timeNow;
 
     private final ExecutorService clientExecutor = Executors.newCachedThreadPool();
     public final List<ClientHandler> clientHandlers = new CopyOnWriteArrayList<>();
@@ -98,6 +99,14 @@ public class ParticleSimulationServer {
         return particleSimulation;
     }
 
+    public void setTime(){
+        timeNow = System.currentTimeMillis();
+    }
+
+    public long getTime(){
+        return timeNow;
+    }
+
     public class ClientHandler implements Runnable {
         private final Socket clientSocket;
         private final int clientID;
@@ -173,7 +182,8 @@ public class ParticleSimulationServer {
                 List<ParticleState> particleStates = particleSimulation.simulationPanel.particles.stream()
                         .map(p -> new ParticleState(p.getXCoord(), p.getYCoord(), p.getVelocity(), p.getAngle()))
                         .collect(Collectors.toList());
-        
+
+                server.setTime();
                 state = new SimulationState(particleStates).getParticles();
                 
                 particleStates.forEach(p -> System.out.println("Particle Sent: " + p.getXCoord() + " " + p.getYCoord() + " " + p.getAngle() + " " + p.getVelocity()));
@@ -207,7 +217,8 @@ public class ParticleSimulationServer {
 
         public byte[] serializeParticle(Particle p) throws IOException {
             ParticleState state = new ParticleState(p.getXCoord(), p.getYCoord(), p.getVelocity(), p.getAngle());
-        
+            server.setTime();
+
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(state);
         
@@ -220,7 +231,7 @@ public class ParticleSimulationServer {
 
         public byte[] serializeExplorer(Explorer e) throws IOException {
             ExplorerState state = new ExplorerState(e.getClientID(), e.getXCoord(), e.getYCoord());
-        
+
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(state);
         
@@ -269,7 +280,6 @@ public class ParticleSimulationServer {
         }
 
         public void sendID(String type, int ClientID) throws IOException {
-            
             ObjectMapper mapper = new ObjectMapper();
             HashMap<String, Integer> clientIDMap = new HashMap<>();
             clientIDMap.put("clientID", ClientID);
@@ -288,7 +298,10 @@ public class ParticleSimulationServer {
             
             dos.writeUTF(type);
             dos.flush();
-        
+
+            dos.writeLong(server.getTime());
+            dos.flush();
+
             ByteBuffer buffer = ByteBuffer.allocate(4);
             buffer.putInt(data.length);
             dos.write(buffer.array());

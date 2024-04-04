@@ -24,4 +24,7 @@ std::string decompressGzip(const std::vector<char>& compressedData);
 
 void sendExplorerToServer(asio::ip::tcp::socket& socket, SimulationPanel& SimPanel);
 
+uint64_t ntohll(uint64_t value);
+long long getTimeDifference(uint64_t javaTimeMillis);
+
 #endif // NETWORK_COMMUNICATION_HPP

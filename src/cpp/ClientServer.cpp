@@ -9,6 +9,8 @@
 #include <iomanip>
 #include <zlib.h>
 #include <fstream>
+#include <chrono>
+#include <cstdint>
 #include <nlohmann/json.hpp>
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
@@ -89,6 +91,27 @@ void sendExplorerToServer(asio::ip::tcp::socket& socket, SimulationPanel& SimPan
     }
 }
 
+uint64_t ntohll(uint64_t value) {
+    static const int num = 1;
+    if (*(char *)&num == 1) {
+        return ((uint64_t)ntohl(value & 0xFFFFFFFF) << 32) | ntohl(value >> 32);
+    } else {
+        return value;
+    }
+}
+
+long long getTimeDifference(uint64_t javaTimeMillis) {
+    uint64_t correctedJavaTimeMillis = ntohll(javaTimeMillis);
+
+    auto now = std::chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    uint64_t currentTimeMillis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+
+    long long timeDifference = currentTimeMillis - correctedJavaTimeMillis;
+
+    return timeDifference;
+}
+
 int main() {
     std::cout << "Current Path: " << fs::current_path() << std::endl;
     
@@ -167,6 +190,14 @@ int main() {
                 dataType.erase(std::remove(dataType.begin(), dataType.end(), '\0'), dataType.end());
 
                 std::cout << "Data Type: " << dataType << std::endl;
+
+                uint64_t serverTime;
+                asio::read(socket, asio::buffer(&serverTime, sizeof(serverTime)));
+                
+                std::cout << "Received server time: " << serverTime << std::endl;
+
+                long elapsedTime = getTimeDifference(serverTime);
+                std::cout << "Elapsed Time: " << elapsedTime << " milliseconds" << std::endl;
 
                 len = asio::read(socket, buffer, asio::transfer_exactly(4));
                 std::vector<unsigned char> jsonLengthBytes(4);
