@@ -115,6 +115,10 @@ void ParticleSimulation::removeExplorer(const json& jsonData){
     simulationPanel.parseJSONToExplorers(jsonData, "remove");
 }
 
+void ParticleSimulation::setIsRunning(){
+    isRunning = false;
+}
+
 bool ParticleSimulation::getIsRunning() const {
     return isRunning.load();
 }

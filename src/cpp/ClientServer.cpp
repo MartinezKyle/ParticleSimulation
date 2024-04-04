@@ -14,6 +14,7 @@
 #include <nlohmann/json.hpp>
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/system/error_code.hpp>
 
 #include "ParticleSimulation.hpp"
 
@@ -170,16 +171,31 @@ int main() {
     });
 
     std::cout << "Starting to read from server." << std::endl;
+
     try {
-        asio::streambuf buffer;
-        std::istream input_stream(&buffer);
-        std::string line;
+        boost::system::error_code ec;
+        size_t len;
+        socket.non_blocking(true, ec);
 
         while (simulation.getIsRunning()) {
+            asio::streambuf buffer;
+            std::istream input_stream(&buffer);
+
             boost::asio::socket_base::bytes_readable command(true);
             socket.io_control(command);
-            if (command.get() != 0){
-                size_t len = asio::read(socket, buffer, asio::transfer_exactly(2));
+
+            len = socket.read_some(buffer.prepare(2), ec); 
+
+            if (ec == boost::asio::error::would_block) {
+                // std::cerr << "Nothing! " << std::endl;
+                
+            } else if (ec) {
+                std::cerr << "Read error: " << ec.message() << std::endl;
+                break;
+
+            } else {
+                buffer.commit(len); 
+
                 std::vector<unsigned char> lengthBytes(2);
                 input_stream.read(reinterpret_cast<char*>(lengthBytes.data()), 2);
                 unsigned int length = (lengthBytes[0] << 8) | lengthBytes[1]; 
@@ -229,14 +245,18 @@ int main() {
                 } catch (const std::exception& e) {
                     std::cerr << "Error handling JSON data: " << e.what() << std::endl;
                 }
-            }
-
+            } 
         }
     } catch (std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
     } 
 
     std::cout << "Close 4" << std::endl;
+    simulation.setIsRunning();
+
+    simUpdateThread.join();
+    simThread.join();
+    explorerThread.join();
 
     return 0;
 }

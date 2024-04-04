@@ -24,6 +24,8 @@ public:
     void addOtherExplorer(const json& jsonData);
     void removeExplorer(const json& jsonData);
 
+    void setIsRunning();
+
     SimulationPanel& getSimulationPanel();
 
 private:
