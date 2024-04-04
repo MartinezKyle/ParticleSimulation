@@ -219,7 +219,7 @@ int main() {
                     if ("ID" == dataType){
                         simulation.setID(jsonParsed);
                     } else if ("Particles" == dataType){
-                        simulation.addParticle(jsonParsed);
+                        simulation.addParticle(jsonParsed, elapsedTime);
                     } else if ("Explorers" == dataType){
                         simulation.addOtherExplorer(jsonParsed);
                     } else if ("Remove" == dataType){

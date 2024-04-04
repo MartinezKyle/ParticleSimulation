@@ -19,11 +19,11 @@ using json = nlohmann::json;
 
 class SimulationPanel : public sf::Drawable, public sf::Transformable {
 public:
+
     SimulationPanel();
 
-    void parseJSONToParticles(const json& jsonData);
+    void parseJSONToParticles(const json& jsonData, long elapsedTime);
     void parseJSONToExplorers(const json& jsonData, const std::string& type);
-
     void addExplorer(int ID, double x, double y);
     const std::shared_ptr<Explorer>& getExplorer() const;
 

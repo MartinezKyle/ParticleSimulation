@@ -13,6 +13,7 @@
 
 #include "Particle.hpp"
 #include "Explorer.hpp"
+#include <corecrt_math_defines.h>
 
 using json = nlohmann::json;
 
@@ -29,7 +30,7 @@ SimulationPanel::SimulationPanel() {
     }
 }
 
-void SimulationPanel::parseJSONToParticles(const json& jsonData) {
+void SimulationPanel::parseJSONToParticles(const json& jsonData , long elapsedTime) {
     if (jsonData.is_array()) {
         for (const auto& obj : jsonData) {
             double angle = obj.at("angle").get<double>();
@@ -45,7 +46,16 @@ void SimulationPanel::parseJSONToParticles(const json& jsonData) {
         double xcoord = jsonData["xcoord"];
         double ycoord = jsonData["ycoord"];
 
-        particles.push_back(std::make_shared<Particle>(xcoord, ycoord, velocity, angle));
+        double angleRadians = angle * M_PI / 180;
+        double Time = static_cast<double>(elapsedTime) / 1000;
+        double displacement = velocity * Time;
+        double NewX = xcoord + (displacement * cos(angleRadians));
+        double NewY = ycoord + (displacement * sin(angleRadians));
+
+        std::cout << "Elapsed Time: " << Time << std::endl;
+        std::cout << "NewX: " << NewX << " NewY: " << NewY << std::endl;
+
+        particles.push_back(std::make_shared<Particle>(NewX, NewY, velocity, angle));
     }
 }
 

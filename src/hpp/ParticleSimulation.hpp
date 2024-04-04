@@ -20,7 +20,7 @@ public:
     void setID(const json& jsonData);
     bool getIsRunning() const;
 
-    void addParticle(const json& jsonData);
+    void addParticle(const json& jsonData , long elapsedTime);
     void addOtherExplorer(const json& jsonData);
     void removeExplorer(const json& jsonData);
 

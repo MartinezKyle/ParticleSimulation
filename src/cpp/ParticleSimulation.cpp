@@ -103,8 +103,8 @@ void ParticleSimulation::setID(const json& jsonData) {
     }
 }
 
-void ParticleSimulation::addParticle(const json& jsonData){
-    simulationPanel.parseJSONToParticles(jsonData);
+void ParticleSimulation::addParticle(const json& jsonData, long elapsedTime) {
+    simulationPanel.parseJSONToParticles(jsonData, elapsedTime);
 }
 
 void ParticleSimulation::addOtherExplorer(const json& jsonData){
