@@ -8,7 +8,7 @@
 ## How to Run
 
 - Run the requirements.sh script either by double clicking or typing sh requirements.sh in a gitbash terminal.
-- Run the run_cmake.sh script file either by double clicking or typing sh run_cmake.sh in a gitbash terminal.
+- Run the run_cmake.sh script file either by double clicking or typing sh run_cmake.sh in a gitbash terminal to compile and build the cpp program. Make sure to have cmake installed.
 - Run the Server by opening the ParticleSimulationServer.JAR file in the main project folder. Or in command line interface 
 on the project main folder, use the command java -jar ParticleExplorerServer.jar
 - Run the Client by opening the ClientServer.exe file
