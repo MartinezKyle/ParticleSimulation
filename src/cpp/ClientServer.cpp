@@ -149,15 +149,16 @@ int main() {
     }
     std::cout << "Connected to server." << std::endl;
 
+    boost::thread simThread([&simulation](){
+        simulation.run();
+        std::cout << "Close 2" << std::endl;
+    });
+
     boost::thread simUpdateThread([&simulation](){
         simulation.updateSimulationLoop();
         std::cout << "Close 1" << std::endl;
     });
 
-    boost::thread simThread([&simulation](){
-        simulation.run();
-        std::cout << "Close 2" << std::endl;
-    });
 
     boost::thread explorerThread([&socket, &simulation](){
         while (simulation.getIsRunning()) {
@@ -175,7 +176,7 @@ int main() {
     try {
         boost::system::error_code ec;
         size_t len;
-        socket.non_blocking(true, ec);
+        //socket.non_blocking(true, ec);
 
         while (simulation.getIsRunning()) {
             asio::streambuf buffer;
