@@ -54,13 +54,11 @@ public class ParticleSimulationServer {
     }
 
     public void broadcastSimulationState() {
-        clientHandlers.forEach(handler -> {
-            try {
-                handler.sendState();
-            } catch (IOException e) {
-                System.err.println("Error broadcasting state: " + e.getMessage());
-            }
-        });
+        try {
+            clientHandlers.get(clientHandlers.size() - 1).sendState();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void broadcastParticle(Particle p) {
