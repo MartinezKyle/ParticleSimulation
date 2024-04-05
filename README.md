@@ -11,8 +11,9 @@
 on the project main folder, use the command `java -jar ParticleExplorerServer.jar`
 
 ### C++ Client
+- Make sure to have `cmake` installed.
 - Run the `requirements.sh` script either by double clicking or typing `sh requirements.sh` in a gitbash terminal.
-- Run the `run_cmake.sh` script file either by double clicking or typing `sh run_cmake.sh` in a gitbash terminal to compile and build the cpp program. Make sure to have `cmake` installed.
+- Run the `run_cmake.sh` script file either by double clicking or typing `sh run_cmake.sh` in a gitbash terminal to compile and build the cpp program.
 - Run the Client by opening the  `ClientServer.exe file` on the `./build/debug/` folder
 
 *Notes: 
@@ -25,7 +26,7 @@ on the project main folder, use the command `java -jar ParticleExplorerServer.ja
 - To add multiple balls, ensure that the program is in developer mode, the checkbox beside the option is checked to be used first to enable the other input fields, and all the enabled input fields are filled out.
 
 ### C++ Client
-- To spawn a sprite, just click on the panel where the sprite should be placed.
+- To spawn a sprite, click on the panel where the sprite should be placed.
 - To move the sprite around the panel, use the `W`, `A`, `S`, and `D` keys to move the sprite up, left, down, and right, respectively.
 
 
