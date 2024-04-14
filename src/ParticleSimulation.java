@@ -8,6 +8,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -16,19 +18,18 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.JToggleButton;
 
 public class ParticleSimulation extends JFrame{
     //private final ExecutorService executorService;
     private final SimulationPanel simulationPanel;
     private final JPanel particleControlPanel = new JPanel(null);
+    private final JPanel particleFieldControlPanel = new JPanel(null);
+    private final JPanel modeControlPanel = new JPanel(null);
+    private final JPanel modeFieldControlPanel = new JPanel(null);
     private final JPanel controlPanel = new JPanel(null);
     private JComboBox<String> addParticleDropdown;
     private JButton particleAddButton;
-    private JButton wallAddButton;
-    private final JPanel particleFieldControlPanel = new JPanel(null);
-    private final JPanel wallControlPanel = new JPanel(null);
-    private final JPanel wallFieldControlPanel = new JPanel(null);
-    private JPanel opt1Panel, opt2Panel, opt3Panel, opt4Panel;
     private JTextField pX1 = new JTextField();
     private JTextField pY1 = new JTextField();
     private JTextField pV1 = new JTextField();
@@ -38,10 +39,6 @@ public class ParticleSimulation extends JFrame{
     private JTextField pV2 = new JTextField();
     private JTextField pA2 = new JTextField();
     private JTextField pN = new JTextField();
-    private JTextField wallX1 = new JTextField();
-    private JTextField wallY1 = new JTextField();
-    private JTextField wallX2 = new JTextField();
-    private JTextField wallY2 = new JTextField();
     private JCheckBox opt2 = new JCheckBox();
     private JCheckBox opt3 = new JCheckBox();
     private JCheckBox opt4 = new JCheckBox();
@@ -61,12 +58,12 @@ public class ParticleSimulation extends JFrame{
     }
 
     public void createControlPanel(){
-        controlPanel.setBounds(1380, 50, 250, 820);
-        controlPanel.setLayout(new GridLayout(2, 1, 0, 0));
-        controlPanel.setBackground(Color.WHITE);
+        controlPanel.setBounds(1380, 50, 250, 720);
+        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
+        // controlPanel.setBackground(Color.WHITE);
         
         //"Single Particle", "Multiple Particle, Varying Start", "Multiple Particle, Varying Angle", "Multiple Particle, Varying Velocity"});
-        
+
         particleControlPanel.setLayout(new BoxLayout(particleControlPanel, BoxLayout.Y_AXIS));
         particleFieldControlPanel.setLayout(new GridLayout(0,2));
         particleFieldControlPanel.add(new JLabel("X1:"));
@@ -174,39 +171,49 @@ public class ParticleSimulation extends JFrame{
         });
         particleControlPanel.add(particleFieldControlPanel);
         particleControlPanel.add(particleAddButton);
-        controlPanel.add(particleControlPanel);
-        wallControlPanel.setLayout(new BoxLayout(wallControlPanel, BoxLayout.Y_AXIS));
-        wallFieldControlPanel.setLayout(new GridLayout(0,2));
-        wallFieldControlPanel.add(new JLabel("X1:"));
-        wallFieldControlPanel.add(wallX1);
-        wallFieldControlPanel.add(new JLabel("Y1:"));
-        wallFieldControlPanel.add(wallY1);
-        wallFieldControlPanel.add(new JLabel("X2:"));
-        wallFieldControlPanel.add(wallX2);
-        wallFieldControlPanel.add(new JLabel("Y2:"));
-        wallFieldControlPanel.add(wallY2);
 
-        wallControlPanel.add(wallFieldControlPanel);
-        wallAddButton = new JButton("Add Wall");
-        wallAddButton.setSize(230, 20);
-        wallAddButton.addActionListener(new ActionListener() {
+        modeControlPanel.setLayout(new GridLayout(3, 1)); 
+
+        JPanel toggleButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+        modeFieldControlPanel.removeAll(); 
+        modeFieldControlPanel.setLayout(new GridLayout(1, 1)); 
+        modeFieldControlPanel.add(new JLabel("Choose Mode:"));
+
+        // Creating the toggle buttons
+        JToggleButton developerToggleButton = new JToggleButton("Developer", true);
+        developerToggleButton.setBackground(Color.LIGHT_GRAY);
+
+        JToggleButton explorerToggleButton = new JToggleButton("Explorer", false);
+        explorerToggleButton.setBackground(Color.LIGHT_GRAY);
+
+        ButtonGroup modeButtonGroup = new ButtonGroup();
+        modeButtonGroup.add(developerToggleButton);
+        modeButtonGroup.add(explorerToggleButton);
+
+        developerToggleButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(java.awt.event.ActionEvent e){
-                double x1 = Integer.parseInt(wallX1.getText());
-                double y1 = Double.parseDouble(wallY1.getText());
-                double x2 = Integer.parseInt(wallX2.getText());
-                double y2 = Double.parseDouble(wallY2.getText());
-
-                simulationPanel.addWall(x1, y1, x2, y2);
-
-                wallX1.setText("");
-                wallY1.setText("");
-                wallX2.setText("");
-                wallY2.setText("");
+            public void actionPerformed(ActionEvent e) {
+                simulationPanel.changeDevMode(true);
             }
         });
-        wallControlPanel.add(wallAddButton);
-        controlPanel.add(wallControlPanel);
+
+        explorerToggleButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                simulationPanel.changeDevMode(false);
+            }
+        });
+
+        toggleButtonPanel.add(developerToggleButton);
+        toggleButtonPanel.add(explorerToggleButton);
+
+        modeControlPanel.add(modeFieldControlPanel);
+        modeControlPanel.add(toggleButtonPanel);
+
+        controlPanel.add(modeControlPanel);
+        controlPanel.add(particleControlPanel);
+        
     }
 
     public void disableMultiples(){
@@ -228,7 +235,6 @@ public class ParticleSimulation extends JFrame{
         pV2.setText("");
         pN.setText("");
     }
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new ParticleSimulation().setVisible(true));
     }
